@@ -764,12 +764,11 @@ function wearPath(it) {
   return 'category/accessory/';
 }
 function shopLinks(it) {
-  const color = searchColor(it.colorName);
   const sp = mapWord(SPECIFIC_MAP, it.desc) || it.cat;
   const ba = mapWord(BASIC_MAP, it.desc) || sp;
-  const withColor = (w) => (color ? color + ' ' : '') + w;
   const a = (url, label) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
-  let html = a('https://zozo.jp/search/?p_keyv=' + encodeURIComponent(withColor(sp)), 'ZOZOで探す');
+  // ZOZOはキーワードをURLに載せると文字化けするため、レディースのカテゴリページ直行
+  let html = a('https://zozo.jp/women-' + wearPath(it), 'ZOZOで探す');
   if (it.cat !== 'アクセサリー') {
     html += a('https://www.uniqlo.com/jp/ja/search?q=' + encodeURIComponent(ba), 'UNIQLO');
     html += a('https://www.gu-global.com/jp/ja/search?q=' + encodeURIComponent(ba), 'GU');
