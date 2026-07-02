@@ -733,6 +733,36 @@ function mapWord(map, desc) {
   const hit = map.find(([k]) => desc.includes(k));
   return hit ? hit[1] : '';
 }
+// アイテム → WEARのカテゴリページ(実在するURLのみ使用)
+function wearPath(it) {
+  const d = it.desc, c = it.cat;
+  const has = (...ws) => ws.some(w => d.includes(w));
+  if (c === 'ワンピース') return 'category/onepiece/';
+  if (c === 'トップス') {
+    if (has('パーカー')) return 'category/tops/parka/';
+    if (has('スウェット')) return 'category/tops/sweat/';
+    if (has('カーディガン')) return 'category/tops/cardigan/';
+    if (has('ジレ')) return 'category/tops/vest/';
+    if (has('Tシャツ', 'カットソー')) return 'category/tops/tshirt-cutsew/';
+    if (has('ブラウス', 'シャツ')) return 'category/tops/shirt-blouse/';
+    if (has('ニット')) return 'category/tops/knit-sweater/';
+    if (has('キャミ')) return 'category/tops/camisole/';
+    return 'category/tops/';
+  }
+  if (c === 'ボトムス') {
+    if (has('スカート')) return 'category/skirt/';
+    if (has('デニム')) return 'category/pants/denim-pants/';
+    if (has('スラックス', 'センタープレス')) return 'category/pants/slacks/';
+    return 'category/pants/';
+  }
+  if (c === 'アウター') return 'category/jacket-outerwear/';
+  if (c === 'シューズ') return 'category/shoes/';
+  if (c === 'バッグ') return 'category/bag/';
+  if (has('バレッタ', 'ヘアピン', 'ヘアクリップ')) return 'category/hair-accessory/';
+  if (has('キャップ')) return 'category/hat/';
+  if (has('マフラー', 'ベルト')) return 'category/fashion-accessories/';
+  return 'category/accessory/';
+}
 function shopLinks(it) {
   const color = searchColor(it.colorName);
   const sp = mapWord(SPECIFIC_MAP, it.desc) || it.cat;
@@ -744,9 +774,9 @@ function shopLinks(it) {
     html += a('https://www.uniqlo.com/jp/ja/search?q=' + encodeURIComponent(ba), 'UNIQLO');
     html += a('https://www.gu-global.com/jp/ja/search?q=' + encodeURIComponent(ba), 'GU');
   }
-  // WEARは身長で絞り込めるので、プロフィールの身長±5cmの実際のコーデ写真を出す
+  // WEARはキーワード検索がURLで指定できないため、カテゴリ専用ページ+身長絞り込みで開く
   const h = Math.round(profile.height || 150);
-  html += a(`https://wear.jp/women-coordinate/?keyword=${encodeURIComponent(withColor(ba))}&from_height=${Math.max(130, h - 5)}&to_height=${h + 5}`,
+  html += a(`https://wear.jp/${wearPath(it)}?from_height=${Math.max(130, h - 5)}&to_height=${h + 5}`,
     `WEARで${h}cm前後のコーデを見る`);
   return `<span class="shoplinks">${html}</span>`;
 }
