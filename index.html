@@ -83,6 +83,9 @@
     border-top: 1px dashed var(--line);
   }
   .oitem .emoji { font-size: 26px; width: 36px; text-align: center; flex-shrink: 0; }
+  .oitem .gicon { width: 48px; flex-shrink: 0; background: #fdf7fa; border-radius: 12px; padding: 2px; }
+  .oitem .gicon svg { width: 44px; height: 44px; display: block; }
+  .citem .noimg svg { width: 62%; height: 62%; }
   .oitem .body { flex: 1; min-width: 0; }
   .oitem .cat { font-size: 11px; color: var(--text-sub); }
   .oitem .desc { font-size: 14px; font-weight: 600; line-height: 1.45; }
@@ -653,14 +656,135 @@ function findClosetMatch(cat, colorName) {
   return exact ? { item: exact, exact: true } : { item: inCat[0], exact: false };
 }
 
-function shopLinks(query) {
-  const q = encodeURIComponent(query);
-  return `<span class="shoplinks">
-    <a href="https://zozo.jp/search/?p_keyv=${q}" target="_blank" rel="noopener">ZOZOで探す</a>
-    <a href="https://www.uniqlo.com/jp/ja/search?q=${q}" target="_blank" rel="noopener">UNIQLO</a>
-    <a href="https://www.gu-global.com/jp/ja/search?q=${q}" target="_blank" rel="noopener">GU</a>
-    <a href="https://wear.jp/search/?text=${q}" target="_blank" rel="noopener">WEARでコーデ検索</a>
-  </span>`;
+/* ---- ショップ検索リンク(ショップごとに検索語を最適化) ---- */
+// パレットの色名 → 検索で通じる一般的な色名
+const SEARCH_COLOR = {
+  'アイボリー':'アイボリー','ライトベージュ':'ベージュ','コーラルピンク':'コーラル','ブライトレッド':'レッド',
+  'ライトイエロー':'イエロー','若草グリーン':'グリーン','キャメル':'キャメル','アプリコット':'オレンジ',
+  'オフホワイト':'ホワイト','グレージュ':'グレージュ','ローズピンク':'ピンク','ラベンダー':'ラベンダー',
+  'ベビーブルー':'ライトブルー','ソフトネイビー':'ネイビー','ライトグレー':'グレー','ラズベリーレッド':'レッド',
+  'モカブラウン':'ブラウン','テラコッタ':'テラコッタ','オリーブグリーン':'オリーブ','マスタード':'マスタード',
+  'ダークレッド':'ボルドー','サーモンベージュ':'ベージュ','ピュアホワイト':'ホワイト','ブラック':'ブラック',
+  'ネイビー':'ネイビー','ロイヤルブルー':'ブルー','フューシャピンク':'ピンク','ワインレッド':'ボルドー',
+  'アイシーブルー':'ライトブルー','トゥルーレッド':'レッド',
+  '白・オフホワイト':'ホワイト','黒':'ブラック','ブラウン・モカ':'ブラウン','ブルー・水色':'ブルー',
+  'グリーン・オリーブ':'グリーン','デニム':'','柄もの':'',
+};
+function searchColor(name) {
+  const s = SEARCH_COLOR[name];
+  return s !== undefined ? s : name.replace(/・.*/, '');
+}
+// アイテム説明 → 具体的な検索ワード(ZOZO・WEAR向け)。先に書いたものが優先
+const SPECIFIC_MAP = [
+  ['シアーブラウス','シアーブラウス'],['ボウタイ','ボウタイブラウス'],['ブラウス','ブラウス'],
+  ['Tシャツ','Tシャツ'],['カットソー','カットソー'],
+  ['ニットワンピ','ニットワンピース'],['ティアードワンピ','ティアードワンピース'],['とろみワンピ','ワンピース'],['ワンピ','ワンピース'],
+  ['シアーカーディガン','シアーカーディガン'],['カーディガン','カーディガン'],['リブニット','リブニット'],
+  ['スウェット','スウェット'],['パーカー','パーカー'],['レースキャミ','レースキャミソール'],['キャミ','キャミソール'],
+  ['ジレ','ジレ'],['ジャケット','ノーカラージャケット'],['ニット','ニット'],
+  ['フレアスカート','フレアスカート'],['プリーツスカート','プリーツスカート'],['チュールスカート','チュールスカート'],
+  ['マーメイドスカート','マーメイドスカート'],['ナロースカート','ナロースカート'],['ロングスカート','ロングスカート'],['スカート','スカート'],
+  ['ワイドスラックス','ワイドスラックス'],['スラックス','スラックス'],['センタープレスパンツ','センタープレスパンツ'],
+  ['ワイドパンツ','ワイドパンツ'],['テーパードパンツ','テーパードパンツ'],['フレアパンツ','フレアパンツ'],
+  ['ストレートデニム','ストレートデニム'],['テーパードデニム','テーパードデニム'],['デニム','デニムパンツ'],['パンツ','パンツ'],
+  ['チェスターコート','チェスターコート'],['ケープコート','ケープコート'],['ショートコート','ショートコート'],['コート','コート'],
+  ['ブルゾン','ブルゾン'],['ダウン','ショートダウン'],['ムートン','ムートンコート'],
+  ['バレエシューズ','バレエシューズ'],['ローファー','ローファー'],['パンプス','パンプス'],['スニーカー','スニーカー'],
+  ['ショートブーツ','ショートブーツ'],['ロングブーツ','ロングブーツ'],['ブーツ','ブーツ'],['サンダル','サンダル'],['ミュール','ミュール'],
+  ['レザーシューズ','レザーシューズ'],['フラット','フラットシューズ'],['シューズ','シューズ'],
+  ['かご','かごバッグ'],['ミニトート','ミニトートバッグ'],['トート','トートバッグ'],['リュック','ミニリュック'],
+  ['クロスボディ','ミニショルダーバッグ'],['ショルダー','ミニショルダーバッグ'],['ハンドバッグ','ミニハンドバッグ'],
+  ['ミニバッグ','ミニバッグ'],['クラッチ','クラッチバッグ'],['バッグ','ミニバッグ'],
+  ['バレッタ','バレッタ'],['ヘアピン','ヘアピン'],['ヘアクリップ','ヘアクリップ'],['ネックレス','ネックレス'],
+  ['ピアス','ピアス'],['イヤーカフ','イヤーカフ'],['マフラー','マフラー'],['ベルト','細ベルト'],['バングル','バングル'],['キャップ','キャップ'],
+];
+// アイテム説明 → ざっくり検索ワード(UNIQLO・GUは商品数が少なめなので基本語だけで検索)
+const BASIC_MAP = [
+  ['ワンピ','ワンピース'],['Tシャツ','Tシャツ'],['カットソー','カットソー'],['ブラウス','ブラウス'],['シャツ','シャツ'],
+  ['カーディガン','カーディガン'],['スウェット','スウェット'],['パーカー','パーカー'],['ジレ','ジレ'],['ジャケット','ジャケット'],
+  ['キャミ','キャミソール'],['ニット','ニット'],
+  ['スカート','スカート'],['デニム','デニム'],['スラックス','スラックス'],['パンツ','パンツ'],
+  ['チェスター','コート'],['コート','コート'],['ブルゾン','ブルゾン'],['ダウン','ダウン'],['ムートン','コート'],
+  ['スニーカー','スニーカー'],['ローファー','ローファー'],['パンプス','パンプス'],['ブーツ','ブーツ'],
+  ['サンダル','サンダル'],['ミュール','サンダル'],['バレエ','フラットシューズ'],['フラット','フラットシューズ'],['シューズ','シューズ'],
+  ['かご','かごバッグ'],['トート','トートバッグ'],['リュック','リュック'],['ショルダー','ショルダーバッグ'],
+  ['クロスボディ','ショルダーバッグ'],['クラッチ','バッグ'],['バッグ','バッグ'],
+  ['バレッタ','ヘアアクセサリー'],['ヘアピン','ヘアアクセサリー'],['ヘアクリップ','ヘアアクセサリー'],
+  ['ネックレス','ネックレス'],['ピアス','ピアス'],['イヤーカフ','イヤーカフ'],['マフラー','マフラー'],
+  ['ベルト','ベルト'],['バングル','ブレスレット'],['キャップ','キャップ'],
+];
+function mapWord(map, desc) {
+  const hit = map.find(([k]) => desc.includes(k));
+  return hit ? hit[1] : '';
+}
+function shopLinks(it) {
+  const color = searchColor(it.colorName);
+  const sp = mapWord(SPECIFIC_MAP, it.desc) || it.cat;
+  const ba = mapWord(BASIC_MAP, it.desc) || sp;
+  const withColor = (w) => (color ? color + ' ' : '') + w;
+  const a = (url, label) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+  let html = a('https://zozo.jp/search/?p_keyv=' + encodeURIComponent(withColor(sp)), 'ZOZOで探す');
+  if (it.cat !== 'アクセサリー') {
+    html += a('https://www.uniqlo.com/jp/ja/search?q=' + encodeURIComponent(ba), 'UNIQLO');
+    html += a('https://www.gu-global.com/jp/ja/search?q=' + encodeURIComponent(ba), 'GU');
+  }
+  html += a('https://wear.jp/search/?text=' + encodeURIComponent(withColor(ba)), 'WEARでコーデ検索');
+  return `<span class="shoplinks">${html}</span>`;
+}
+
+/* ---- アイテムのイラスト(提案カラーで塗った服のシルエット) ---- */
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  return '#' + [16, 8, 0].map(s =>
+    Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f))).toString(16).padStart(2, '0')).join('');
+}
+function garmentSVG(cat, desc, hex) {
+  const ln = shade(hex, .68);
+  const op = desc.includes('シアー') ? ' fill-opacity=".55"' : '';
+  const P = (d, o = '') => `<path d="${d}" fill="${hex}" stroke="${ln}" stroke-width="3" stroke-linejoin="round"${o}/>`;
+  const L = (d) => `<path d="${d}" fill="none" stroke="${ln}" stroke-width="2.5" stroke-linecap="round"/>`;
+  const C = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${hex}" stroke="${ln}" stroke-width="3"/>`;
+  const has = (...ws) => ws.some(w => desc.includes(w));
+  let g = '';
+  if (cat === 'ワンピース') {
+    g = P('M40 14 L60 14 L63 42 L79 84 Q50 94 21 84 L37 42 Z', op) + L('M37 44 Q50 50 63 44') + L('M43 14 Q50 20 57 14');
+  } else if (cat === 'ボトムス') {
+    if (has('スカート')) {
+      if (has('ナロー', 'タイト', 'マーメイド')) g = P('M37 20 L63 20 L61 88 L39 88 Z', op) + L('M37 28 L63 28') + L('M50 88 L50 72');
+      else g = P('M36 20 L64 20 L80 84 Q50 93 20 84 Z', op) + L('M35 28 Q50 32 65 28') + L('M44 33 L38 80') + L('M50 33 L50 84') + L('M56 33 L62 80');
+    } else if (has('ワイド', 'スラックス', 'フレアパンツ')) {
+      g = P('M33 18 L67 18 L74 88 L55 88 L50 44 L45 88 L26 88 Z', op) + L('M33 26 L67 26');
+    } else {
+      g = P('M36 18 L64 18 L61 88 L52 88 L50 46 L48 88 L39 88 Z', op) + L('M36 26 L64 26');
+    }
+  } else if (cat === 'トップス') {
+    if (has('パーカー')) g = P('M35 24 Q50 32 65 24 L80 32 L76 76 L66 73 L66 86 L34 86 L34 73 L24 76 L20 32 Z') + P('M35 24 Q50 10 65 24 Q50 34 35 24 Z') + L('M42 70 Q50 77 58 70');
+    else if (has('キャミ') && !has('ブラウス', 'カーディガン')) g = P('M38 32 L62 32 L67 84 L33 84 Z', op) + L('M40 32 L43 18') + L('M60 32 L57 18');
+    else if (has('ジレ')) g = P('M36 16 L64 16 L74 24 L70 86 L54 86 L54 30 L46 30 L46 86 L30 86 L26 24 Z');
+    else if (has('ブラウス', 'シャツ')) g = P('M34 20 Q50 28 66 20 L80 28 L75 74 L66 71 L67 84 Q50 89 33 84 L34 71 L25 74 L20 28 Z', op) + L('M42 20 Q50 29 58 20') + C(50, 31, 3);
+    else if (has('ニット', 'カーディガン', 'スウェット')) g = P('M34 20 Q50 28 66 20 L80 28 L75 74 L66 71 L67 84 Q50 89 33 84 L34 71 L25 74 L20 28 Z', op) + L('M42 84 L42 76') + L('M50 86 L50 78') + L('M58 84 L58 76');
+    else g = P('M34 20 Q50 28 66 20 L81 30 L73 46 L66 41 L66 84 L34 84 L34 41 L27 46 L19 30 Z', op) + L('M43 21 Q50 27 57 21');
+  } else if (cat === 'アウター') {
+    if (has('チェスター', 'ロング')) g = P('M33 14 L67 14 L79 24 L73 86 L27 86 L21 24 Z') + L('M50 30 L50 86') + L('M44 14 L50 30 L56 14');
+    else g = P('M33 18 L67 18 L79 28 L74 64 L26 64 L21 28 Z') + L('M50 32 L50 64') + L('M44 18 L50 32 L56 18');
+  } else if (cat === 'シューズ') {
+    if (has('スニーカー')) g = P('M16 64 Q18 52 33 54 L52 58 Q72 60 84 68 L84 76 Q50 82 16 76 Z') + L('M16 71 Q50 78 84 71') + L('M36 57 L41 64') + L('M45 59 L50 65');
+    else if (has('ブーツ')) g = P('M38 16 L62 16 L62 60 L78 66 L78 80 L38 80 Z') + L('M38 74 L78 74') + L('M62 60 L62 66');
+    else if (has('サンダル', 'ミュール')) g = P('M18 70 Q50 60 82 70 L82 78 Q50 85 18 78 Z') + L('M34 68 L46 56 L58 66');
+    else g = P('M20 62 Q44 50 64 57 Q80 62 83 70 L83 74 Q50 81 20 74 Z') + L('M32 60 Q42 55 51 58');
+  } else if (cat === 'バッグ') {
+    if (has('かご')) g = P('M27 46 L73 46 L67 82 L33 82 Z') + L('M38 46 Q50 24 62 46') + L('M31 56 L69 56') + L('M32 66 L68 66');
+    else if (has('トート')) g = P('M26 42 L74 42 L70 84 L30 84 Z') + L('M38 42 Q38 26 50 26 Q62 26 62 42');
+    else if (has('リュック')) g = P('M32 40 Q32 28 50 28 Q68 28 68 40 L68 78 Q50 86 32 78 Z') + L('M32 56 L68 56') + L('M44 28 Q50 20 56 28');
+    else g = P('M30 48 L70 48 L66 80 L34 80 Z') + L('M37 48 Q50 20 63 48') + L('M30 60 L70 60');
+  } else {
+    if (has('ネックレス', 'ピアス', 'イヤーカフ', 'バングル', 'パール')) g = L('M28 28 Q50 64 72 28') + C(50, 64, 6);
+    else if (has('マフラー')) g = P('M32 28 Q50 18 68 28 L68 44 Q50 53 32 44 Z') + P('M44 48 L40 84 L54 84 L54 50 Z');
+    else if (has('ベルト')) g = P('M20 44 L80 44 L80 56 L20 56 Z') + `<rect x="44" y="38" width="14" height="24" rx="3" fill="none" stroke="${ln}" stroke-width="3"/>`;
+    else if (has('キャップ')) g = P('M28 56 Q28 34 50 34 Q72 34 72 56 Z') + L('M72 56 L88 61') + L('M28 56 L72 56');
+    else g = P('M48 50 L24 36 L24 64 Z') + P('M52 50 L76 36 L76 64 Z') + C(50, 50, 7);
+  }
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
 }
 
 function ngHit(text) {
@@ -721,10 +845,10 @@ function renderOutfit() {
     }
     if (it.match && !it.match.exact) {
       right = `<span class="have" style="color:#b08a2e;background:#fdf3dd">△ 手持ちの${it.cat}(${esc(it.match.item.color)})でも代用OK</span>` +
-        shopLinks(it.colorName.replace(/・.*/,'') + ' ' + shortDesc(it.desc));
+        shopLinks(it);
       return row(it, right, '');
     }
-    right = shopLinks(it.colorName.replace(/・.*/,'') + ' ' + shortDesc(it.desc));
+    right = shopLinks(it);
     return row(it, right, '');
   }).join('');
 
@@ -741,7 +865,7 @@ function renderOutfit() {
 
   function row(it, right, img) {
     return `<div class="oitem">
-      <span class="emoji">${CAT_EMOJI[it.cat] || '👗'}</span>
+      <span class="gicon">${garmentSVG(it.cat, it.desc, it.hex)}</span>
       <div class="body">
         <div class="cat">${it.cat}</div>
         <div class="desc">${esc(it.desc)}${it.trendKey ? '<span class="trendtag">2026トレンド</span>' : ''}</div>
@@ -750,10 +874,6 @@ function renderOutfit() {
       </div>${img}
     </div>`;
   }
-}
-function shortDesc(d) {
-  // 検索ワード用にアイテム名の主要部分だけ抜く
-  return d.replace(/[(（][^)）]*[)）]/g, '').replace(/[+＋].*/, '').trim().split(/\s/)[0].slice(0, 14);
 }
 
 function saveFavorite() {
@@ -842,7 +962,7 @@ function renderCloset() {
   document.getElementById('closetCount').textContent = closet.length ? `(${closet.length}着)` : '';
   grid.innerHTML = closet.slice().reverse().map(i => `
     <div class="citem">
-      ${i.photo ? `<img src="${i.photo}" alt="">` : `<div class="noimg">${CAT_EMOJI[i.category] || '👗'}</div>`}
+      ${i.photo ? `<img src="${i.photo}" alt="">` : `<div class="noimg">${garmentSVG(i.category, i.name || '', colorHexByName(i.color))}</div>`}
       <button class="del" onclick="delClosetItem('${i.id}')">×</button>
       <div class="meta">
         <div class="n">${esc(i.name || i.category)}</div>
