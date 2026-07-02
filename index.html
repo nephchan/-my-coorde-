@@ -744,7 +744,10 @@ function shopLinks(it) {
     html += a('https://www.uniqlo.com/jp/ja/search?q=' + encodeURIComponent(ba), 'UNIQLO');
     html += a('https://www.gu-global.com/jp/ja/search?q=' + encodeURIComponent(ba), 'GU');
   }
-  html += a('https://wear.jp/search/?text=' + encodeURIComponent(withColor(ba)), 'WEARでコーデ検索');
+  // WEARは身長で絞り込めるので、プロフィールの身長±5cmの実際のコーデ写真を出す
+  const h = Math.round(profile.height || 150);
+  html += a(`https://wear.jp/women-coordinate/?keyword=${encodeURIComponent(withColor(ba))}&from_height=${Math.max(130, h - 5)}&to_height=${h + 5}`,
+    `WEARで${h}cm前後のコーデを見る`);
   return `<span class="shoplinks">${html}</span>`;
 }
 
