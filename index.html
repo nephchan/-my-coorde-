@@ -86,6 +86,22 @@
   .oitem .gicon { width: 48px; flex-shrink: 0; background: #fdf7fa; border-radius: 12px; padding: 2px; }
   .oitem .gicon svg { width: 44px; height: 44px; display: block; }
   .citem .noimg svg { width: 62%; height: 62%; }
+
+  /* コーデボード(全身をひと目で) */
+  .coordboard {
+    display: flex; gap: 8px; align-items: center;
+    background: linear-gradient(135deg, #fff5fa, #f5effc);
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 12px 8px; margin-bottom: 12px;
+  }
+  .cb-main { flex: 1.3; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .cb-side { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 4px; align-content: center; }
+  .cb-item { text-align: center; }
+  .cb-main .cb-item svg { width: 88px; height: 88px; display: block; margin: 0 auto; }
+  .cb-side .cb-item svg { width: 50px; height: 50px; display: block; margin: 0 auto; }
+  .cb-item span { display: block; font-size: 9px; color: var(--text-sub); line-height: 1.3; }
+  .cb-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; border: 2px solid #d9f0e2; display: block; margin: 0 auto; }
+  .cb-side .cb-item img { width: 46px; height: 46px; }
   .oitem .body { flex: 1; min-width: 0; }
   .oitem .cat { font-size: 11px; color: var(--text-sub); }
   .oitem .desc { font-size: 14px; font-weight: 600; line-height: 1.45; }
@@ -739,50 +755,173 @@ function shade(hex, f) {
     Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f))).toString(16).padStart(2, '0')).join('');
 }
 function garmentSVG(cat, desc, hex) {
-  const ln = shade(hex, .68);
+  const ln = shade(hex, .62);   // 輪郭
+  const dk = shade(hex, .84);   // 影・切り替え部分
+  const hl = shade(hex, 1.22);  // 明るい部分
   const op = desc.includes('シアー') ? ' fill-opacity=".55"' : '';
-  const P = (d, o = '') => `<path d="${d}" fill="${hex}" stroke="${ln}" stroke-width="3" stroke-linejoin="round"${o}/>`;
-  const L = (d) => `<path d="${d}" fill="none" stroke="${ln}" stroke-width="2.5" stroke-linecap="round"/>`;
-  const C = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${hex}" stroke="${ln}" stroke-width="3"/>`;
+  const P = (d, o = '') => `<path d="${d}" fill="${hex}" stroke="${ln}" stroke-width="2.5" stroke-linejoin="round"${o}/>`;
+  const D = (d) => `<path d="${d}" fill="${dk}" stroke="${ln}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const H = (d) => `<path d="${d}" fill="${hl}" stroke="${ln}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const L = (d) => `<path d="${d}" fill="none" stroke="${ln}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const dot = (x, y, r = 2.2) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${ln}"/>`;
+  const st = (d) => `<path d="${d}" fill="none" stroke="#e8c49a" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>`;
   const has = (...ws) => ws.some(w => desc.includes(w));
   let g = '';
+
   if (cat === 'ワンピース') {
-    g = P('M40 14 L60 14 L63 42 L79 84 Q50 94 21 84 L37 42 Z', op) + L('M37 44 Q50 50 63 44') + L('M43 14 Q50 20 57 14');
+    if (has('ニットワンピ', 'リブ')) {
+      g = P('M40 14 Q50 21 60 14 L64 48 L62 88 L38 88 L36 48 Z', op)
+        + L('M43 14 Q50 20 57 14') + L('M44 24 L44 84') + L('M50 26 L50 86') + L('M56 24 L56 84')
+        + D('M37 50 L63 50 L63 55 L37 55 Z');
+    } else {
+      g = P('M40 15 Q50 22 60 15 L63 42 L37 42 Z', op)
+        + P('M37 42 L63 42 L79 82 Q66 89 50 87 Q34 89 21 82 Z', op)
+        + L('M44 46 L40 80') + L('M56 46 L60 80')
+        + D('M37 40 L63 40 L63 47 L37 47 Z')
+        + H('M50 43 L42 39 L42 48 Z') + H('M50 43 L58 39 L58 48 Z') + dot(50, 43, 2.6);
+    }
   } else if (cat === 'ボトムス') {
     if (has('スカート')) {
-      if (has('ナロー', 'タイト', 'マーメイド')) g = P('M37 20 L63 20 L61 88 L39 88 Z', op) + L('M37 28 L63 28') + L('M50 88 L50 72');
-      else g = P('M36 20 L64 20 L80 84 Q50 93 20 84 Z', op) + L('M35 28 Q50 32 65 28') + L('M44 33 L38 80') + L('M50 33 L50 84') + L('M56 33 L62 80');
-    } else if (has('ワイド', 'スラックス', 'フレアパンツ')) {
-      g = P('M33 18 L67 18 L74 88 L55 88 L50 44 L45 88 L26 88 Z', op) + L('M33 26 L67 26');
+      if (has('ナロー', 'タイト')) {
+        g = D('M38 18 L62 18 L62 25 L38 25 Z') + P('M38 25 L62 25 L60 88 L40 88 Z', op)
+          + L('M50 88 L50 70') + L('M42 30 L41 84') + L('M58 30 L59 84');
+      } else if (has('マーメイド')) {
+        g = D('M39 18 L61 18 L61 25 L39 25 Z')
+          + P('M39 25 L61 25 L58 58 Q70 74 66 88 L34 88 Q30 74 42 58 Z', op)
+          + L('M45 30 L44 56') + L('M55 30 L56 56');
+      } else if (has('プリーツ')) {
+        g = D('M37 18 L63 18 L63 24 L37 24 Z') + P('M37 24 L63 24 L75 86 L25 86 Z', op)
+          + L('M43 26 L35 84') + L('M48 26 L45 85') + L('M52 26 L55 85') + L('M57 26 L65 84');
+      } else if (has('ティアード')) {
+        g = P('M41 18 L59 18 L62 40 L38 40 Z', op) + P('M38 40 L62 40 L68 62 L32 62 Z', op)
+          + P('M32 62 L68 62 L74 86 Q50 92 26 86 Z', op)
+          + L('M44 42 L44 47') + L('M50 42 L50 47') + L('M56 42 L56 47')
+          + L('M40 64 L40 69') + L('M50 64 L50 69') + L('M60 64 L60 69');
+      } else { // フレア
+        g = D('M37 18 L63 18 L63 25 L37 25 Z')
+          + P('M37 25 L63 25 L80 82 Q73 87 65 84 Q58 88 50 85 Q42 88 35 84 Q27 87 20 82 Z', op)
+          + L('M45 28 L38 80') + L('M50 28 L50 83') + L('M55 28 L62 80');
+      }
     } else {
-      g = P('M36 18 L64 18 L61 88 L52 88 L50 46 L48 88 L39 88 Z', op) + L('M36 26 L64 26');
+      const denim = has('デニム');
+      if (has('ワイド', 'スラックス', 'フレアパンツ')) {
+        g = D('M34 16 L66 16 L66 23 L34 23 Z') + P('M34 23 L66 23 L72 88 L54 88 L50 44 L46 88 L28 88 Z', op)
+          + L('M41 28 L37 84') + L('M59 28 L63 84');
+      } else {
+        g = D('M36 16 L64 16 L64 23 L36 23 Z') + P('M36 23 L64 23 L60 88 L52 88 L50 48 L48 88 L40 88 Z', op);
+      }
+      if (denim) g += st('M38 27 Q44 31 48 27') + st('M52 27 Q56 31 62 27') + st('M50 26 L50 40') + dot(50, 20, 2);
+      else g += L('M50 26 L50 44');
     }
   } else if (cat === 'トップス') {
-    if (has('パーカー')) g = P('M35 24 Q50 32 65 24 L80 32 L76 76 L66 73 L66 86 L34 86 L34 73 L24 76 L20 32 Z') + P('M35 24 Q50 10 65 24 Q50 34 35 24 Z') + L('M42 70 Q50 77 58 70');
-    else if (has('キャミ') && !has('ブラウス', 'カーディガン')) g = P('M38 32 L62 32 L67 84 L33 84 Z', op) + L('M40 32 L43 18') + L('M60 32 L57 18');
-    else if (has('ジレ')) g = P('M36 16 L64 16 L74 24 L70 86 L54 86 L54 30 L46 30 L46 86 L30 86 L26 24 Z');
-    else if (has('ブラウス', 'シャツ')) g = P('M34 20 Q50 28 66 20 L80 28 L75 74 L66 71 L67 84 Q50 89 33 84 L34 71 L25 74 L20 28 Z', op) + L('M42 20 Q50 29 58 20') + C(50, 31, 3);
-    else if (has('ニット', 'カーディガン', 'スウェット')) g = P('M34 20 Q50 28 66 20 L80 28 L75 74 L66 71 L67 84 Q50 89 33 84 L34 71 L25 74 L20 28 Z', op) + L('M42 84 L42 76') + L('M50 86 L50 78') + L('M58 84 L58 76');
-    else g = P('M34 20 Q50 28 66 20 L81 30 L73 46 L66 41 L66 84 L34 84 L34 41 L27 46 L19 30 Z', op) + L('M43 21 Q50 27 57 21');
+    if (has('パーカー')) {
+      g = P('M33 26 L45 18 L55 18 L67 26 L77 34 L72 82 Q50 88 28 82 L23 34 Z')
+        + D('M38 22 Q50 8 62 22 L58 30 Q50 25 42 30 Z')
+        + D('M39 66 L61 66 L58 81 L42 81 Z')
+        + L('M46 30 L45 42') + L('M54 30 L55 42');
+    } else if (has('キャミ') && !has('ブラウス', 'カーディガン')) {
+      g = P('M38 30 Q50 36 62 30 L66 82 Q50 87 34 82 Z', op)
+        + L('M40 30 L44 14') + L('M60 30 L56 14')
+        + L('M38 31 Q41 35 44 31 Q47 35 50 31 Q53 35 56 31 Q59 35 62 31')
+        + L('M35 82 Q38 87 41 82 Q44 87 47 82 Q50 87 53 82 Q56 87 59 82 Q62 87 65 82');
+    } else if (has('ジレ')) {
+      g = D('M46 24 L54 24 L54 86 L46 86 Z')
+        + P('M36 16 L46 21 L46 86 L28 86 L26 24 Z') + P('M64 16 L54 21 L54 86 L72 86 L74 24 Z')
+        + dot(42, 50) + dot(42, 62);
+    } else if (has('カーディガン')) {
+      g = P('M33 22 L43 15 Q50 21 57 15 L67 22 L76 30 L72 76 Q68 79 64 76 L62 46 L62 84 Q50 88 38 84 L38 46 L36 76 Q32 79 28 76 L24 30 Z', op)
+        + L('M43 15 L50 28 L57 15') + L('M50 28 L50 84')
+        + dot(46, 40) + dot(46, 52) + dot(46, 64);
+    } else if (has('ブラウス', 'シャツ')) {
+      g = P('M35 23 Q27 26 25 40 Q30 46 36 43 L37 84 Q50 88 63 84 L64 43 Q70 46 75 40 Q73 26 65 23 L57 17 Q50 22 43 17 Z', op)
+        + H('M43 17 L50 26 L57 17 L54 14 L50 17 L46 14 Z')
+        + L('M50 28 L50 84') + dot(50, 36, 1.8) + dot(50, 48, 1.8) + dot(50, 60, 1.8) + dot(50, 72, 1.8);
+    } else if (has('ニット', 'スウェット')) {
+      g = P('M33 23 L43 15 Q50 22 57 15 L67 23 L76 31 L72 77 Q68 80 64 77 L62 47 L62 83 Q50 87 38 83 L38 47 L36 77 Q32 80 28 77 L24 31 Z', op)
+        + L('M43 15 Q50 23 57 15')
+        + L('M41 83 L41 76') + L('M46 85 L46 78') + L('M51 85 L51 78') + L('M56 84 L56 77')
+        + L('M28 74 L35 73') + L('M65 73 L72 74');
+    } else { // Tシャツ
+      g = P('M33 25 L43 17 Q50 23 57 17 L67 25 L78 35 L70 46 L65 42 L65 84 Q50 87 35 84 L35 42 L30 46 L22 35 Z', op)
+        + L('M43 17 Q50 24 57 17') + L('M35 80 Q50 83 65 80');
+    }
   } else if (cat === 'アウター') {
-    if (has('チェスター', 'ロング')) g = P('M33 14 L67 14 L79 24 L73 86 L27 86 L21 24 Z') + L('M50 30 L50 86') + L('M44 14 L50 30 L56 14');
-    else g = P('M33 18 L67 18 L79 28 L74 64 L26 64 L21 28 Z') + L('M50 32 L50 64') + L('M44 18 L50 32 L56 18');
+    const long = has('チェスター', 'ロング');
+    const hem = long ? 86 : 64;
+    g = P(`M32 16 L44 16 L50 26 L56 16 L68 16 L80 27 L74 ${hem} L26 ${hem} L20 27 Z`)
+      + D('M44 16 L50 26 L44 33 L38 21 Z') + D('M56 16 L50 26 L56 33 L62 21 Z')
+      + L(`M50 33 L50 ${hem}`) + dot(54, 44) + dot(54, 54);
+    if (has('ダウン', 'ボア', 'ムートン')) g += L('M24 42 Q50 47 76 42') + L('M25 53 Q50 58 75 53');
+    else g += L(`M30 ${hem - 12} L38 ${hem - 12}`) + L(`M62 ${hem - 12} L70 ${hem - 12}`);
   } else if (cat === 'シューズ') {
-    if (has('スニーカー')) g = P('M16 64 Q18 52 33 54 L52 58 Q72 60 84 68 L84 76 Q50 82 16 76 Z') + L('M16 71 Q50 78 84 71') + L('M36 57 L41 64') + L('M45 59 L50 65');
-    else if (has('ブーツ')) g = P('M38 16 L62 16 L62 60 L78 66 L78 80 L38 80 Z') + L('M38 74 L78 74') + L('M62 60 L62 66');
-    else if (has('サンダル', 'ミュール')) g = P('M18 70 Q50 60 82 70 L82 78 Q50 85 18 78 Z') + L('M34 68 L46 56 L58 66');
-    else g = P('M20 62 Q44 50 64 57 Q80 62 83 70 L83 74 Q50 81 20 74 Z') + L('M32 60 Q42 55 51 58');
+    if (has('スニーカー')) {
+      g = P('M15 68 Q17 52 33 52 L50 56 Q70 58 85 68 Z')
+        + H('M14 68 L86 68 L85 77 Q50 82 15 77 Z')
+        + L('M37 55 L43 62') + L('M43 55 L37 62') + L('M48 58 L54 64') + L('M54 58 L48 64')
+        + L('M68 60 Q78 63 84 68');
+    } else if (has('ブーツ')) {
+      const top = has('ロングブーツ') ? 14 : 30;
+      g = P(`M38 ${top} L62 ${top} L62 60 L78 66 L78 80 L38 80 Z`)
+        + D('M38 76 L78 76 L78 80 L38 80 Z') + L(`M38 ${top + 6} L62 ${top + 6}`);
+    } else if (has('サンダル', 'ミュール')) {
+      g = P('M18 72 Q50 63 82 72 L82 80 Q50 86 18 80 Z')
+        + L('M34 70 L46 58 L58 68') + L('M58 60 Q64 55 68 61');
+      if (has('厚底')) g += L('M20 77 Q50 82 80 77');
+    } else if (has('ローファー')) {
+      g = P('M17 66 Q40 54 64 60 Q80 64 84 70 L84 76 Q50 82 17 76 Z')
+        + D('M40 58 L57 61 L55 68 L38 65 Z') + L('M46 61 L48 66');
+    } else if (has('バレエ')) {
+      g = P('M18 66 Q40 56 62 60 Q78 63 83 71 L83 75 Q50 82 18 75 Z')
+        + L('M30 64 Q46 59 60 63')
+        + H('M72 64 L66 60 L67 68 Z') + H('M72 64 L78 61 L78 69 Z') + dot(72, 64, 2);
+    } else { // パンプス
+      g = P('M16 68 Q38 54 60 60 L84 66 L84 72 L74 72 L72 84 L64 84 L66 72 Q40 78 16 74 Z')
+        + L('M28 65 Q40 59 52 61');
+    }
   } else if (cat === 'バッグ') {
-    if (has('かご')) g = P('M27 46 L73 46 L67 82 L33 82 Z') + L('M38 46 Q50 24 62 46') + L('M31 56 L69 56') + L('M32 66 L68 66');
-    else if (has('トート')) g = P('M26 42 L74 42 L70 84 L30 84 Z') + L('M38 42 Q38 26 50 26 Q62 26 62 42');
-    else if (has('リュック')) g = P('M32 40 Q32 28 50 28 Q68 28 68 40 L68 78 Q50 86 32 78 Z') + L('M32 56 L68 56') + L('M44 28 Q50 20 56 28');
-    else g = P('M30 48 L70 48 L66 80 L34 80 Z') + L('M37 48 Q50 20 63 48') + L('M30 60 L70 60');
-  } else {
-    if (has('ネックレス', 'ピアス', 'イヤーカフ', 'バングル', 'パール')) g = L('M28 28 Q50 64 72 28') + C(50, 64, 6);
-    else if (has('マフラー')) g = P('M32 28 Q50 18 68 28 L68 44 Q50 53 32 44 Z') + P('M44 48 L40 84 L54 84 L54 50 Z');
-    else if (has('ベルト')) g = P('M20 44 L80 44 L80 56 L20 56 Z') + `<rect x="44" y="38" width="14" height="24" rx="3" fill="none" stroke="${ln}" stroke-width="3"/>`;
-    else if (has('キャップ')) g = P('M28 56 Q28 34 50 34 Q72 34 72 56 Z') + L('M72 56 L88 61') + L('M28 56 L72 56');
-    else g = P('M48 50 L24 36 L24 64 Z') + P('M52 50 L76 36 L76 64 Z') + C(50, 50, 7);
+    if (has('かご')) {
+      g = P('M28 46 L72 46 L66 82 L34 82 Z')
+        + L('M38 46 Q50 25 62 46')
+        + L('M32 55 L68 55') + L('M31 64 L69 64') + L('M33 73 L67 73')
+        + L('M42 47 L44 81') + L('M50 47 L50 82') + L('M58 47 L56 81');
+    } else if (has('トート')) {
+      g = P('M26 44 L74 44 L70 84 L30 84 Z')
+        + L('M38 44 Q42 28 50 28 Q58 28 62 44') + L('M28 52 L72 52');
+    } else if (has('リュック')) {
+      g = P('M32 42 Q32 28 50 28 Q68 28 68 42 L68 78 Q50 84 32 78 Z')
+        + D('M40 56 L60 56 L58 74 Q50 77 42 74 Z')
+        + L('M44 28 Q50 22 56 28') + L('M32 48 L68 48');
+    } else { // ミニショルダー
+      g = `<path d="M36 46 Q50 18 64 46" fill="none" stroke="${ln}" stroke-width="2.2" stroke-dasharray="4 3"/>`
+        + P('M31 50 Q31 46 35 46 L65 46 Q69 46 69 50 L67 78 Q50 82 33 78 Z')
+        + D('M32 46 L68 46 L65 62 Q50 66 35 62 Z') + dot(50, 62, 2.6);
+    }
+  } else { // アクセサリー
+    if (has('ネックレス', 'パール')) {
+      g = `<path d="M28 26 Q50 62 72 26" fill="none" stroke="${ln}" stroke-width="2.2" stroke-dasharray="1 4" stroke-linecap="round"/>`
+        + `<circle cx="50" cy="64" r="6" fill="${hl}" stroke="${ln}" stroke-width="2.5"/>`
+        + L('M62 70 L66 74') + L('M66 70 L62 74');
+    } else if (has('ピアス', 'イヤーカフ')) {
+      g = L('M36 22 Q42 16 44 24') + `<circle cx="42" cy="38" r="6" fill="${hl}" stroke="${ln}" stroke-width="2.5"/>` + L('M42 24 L42 32')
+        + L('M58 22 Q64 16 66 24') + `<circle cx="64" cy="38" r="6" fill="${hl}" stroke="${ln}" stroke-width="2.5"/>` + L('M64 24 L64 32');
+    } else if (has('マフラー')) {
+      g = P('M30 26 Q50 16 70 26 L70 42 Q50 51 30 42 Z')
+        + P('M44 46 L40 80 L54 80 L52 48 Z')
+        + L('M42 80 L42 86') + L('M47 80 L47 86') + L('M52 80 L52 86')
+        + L('M32 33 Q50 41 68 33');
+    } else if (has('ベルト')) {
+      g = P('M18 46 L82 46 L82 56 L18 56 Z')
+        + `<rect x="42" y="40" width="16" height="22" rx="3" fill="none" stroke="${ln}" stroke-width="2.5"/>`
+        + dot(66, 51, 1.6) + dot(72, 51, 1.6);
+    } else if (has('キャップ')) {
+      g = P('M28 56 Q28 34 50 34 Q72 34 72 56 Z')
+        + D('M28 56 L72 56 Q84 58 86 63 L28 62 Z')
+        + L('M50 34 L50 56') + L('M38 38 L42 56') + L('M62 38 L58 56') + dot(50, 34, 2);
+    } else { // リボン・ヘアアクセ
+      g = P('M48 50 Q34 38 27 41 Q22 50 27 59 Q34 62 48 50 Z') + P('M52 50 Q66 38 73 41 Q78 50 73 59 Q66 62 52 50 Z')
+        + P('M47 55 L42 72 L50 67 Z') + P('M53 55 L58 72 L50 67 Z')
+        + `<circle cx="50" cy="50" r="5.5" fill="${dk}" stroke="${ln}" stroke-width="2.5"/>`;
+    }
   }
   return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
 }
@@ -852,9 +991,24 @@ function renderOutfit() {
     return row(it, right, '');
   }).join('');
 
+  // コーデボード:トップス+ボトムス/ワンピを大きく、小物を横に
+  const cbItem = (it, cls = '') => {
+    const visual = (it.match && it.match.exact && it.match.item.photo)
+      ? `<img src="${it.match.item.photo}" alt="">`
+      : garmentSVG(it.cat, it.desc, it.hex);
+    return `<div class="cb-item ${cls}">${visual}<span><span class="swatch" style="background:${it.hex};width:8px;height:8px"></span>${esc(it.colorName)}</span></div>`;
+  };
+  const mains = ['トップス', 'ワンピース', 'ボトムス'].map(c => o.items.find(i => i.cat === c)).filter(Boolean);
+  const sides = ['アウター', 'シューズ', 'バッグ', 'アクセサリー'].map(c => o.items.find(i => i.cat === c)).filter(Boolean);
+  const board = `<div class="coordboard">
+    <div class="cb-main">${mains.map(i => cbItem(i)).join('')}</div>
+    <div class="cb-side">${sides.map(i => cbItem(i)).join('')}</div>
+  </div>`;
+
   area.innerHTML = `<div class="card">
     <div class="outfit-title">🪄 ${esc(o.recipeName)}</div>
     <div class="outfit-sub">${esc(o.taste)} × ${SEASONS[o.season]}コーデ</div>
+    ${board}
     ${rows}
     <div class="tips"><b>💡 似合わせポイント</b><ul>${o.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
     <div class="btn-row">
