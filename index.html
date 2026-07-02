@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#e56aa5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>マイコーデ - 似合わせコーデ提案</title>
+<style>
+  :root {
+    --pink: #e56aa5;
+    --pink-dark: #c94f8a;
+    --pink-light: #fce7f1;
+    --lavender: #b79ce0;
+    --bg: #fdf7fa;
+    --card: #ffffff;
+    --text: #4a3a44;
+    --text-sub: #9a8792;
+    --line: #f0dfe8;
+    --ok: #6bbf8a;
+    --radius: 18px;
+    --shadow: 0 2px 12px rgba(201, 79, 138, 0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+    background: var(--bg); color: var(--text);
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  header {
+    background: linear-gradient(135deg, #f7a8c9, #e56aa5 55%, #b79ce0);
+    color: #fff; padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    position: sticky; top: 0; z-index: 20;
+  }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  header p { font-size: 11px; opacity: .9; margin-top: 2px; }
+  main { max-width: 520px; margin: 0 auto; padding: 14px 14px 20px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; animation: fadein .25s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px;
+  }
+  .card h2 { font-size: 15px; margin-bottom: 10px; color: var(--pink-dark); display: flex; align-items: center; gap: 6px; }
+  .card h3 { font-size: 13px; margin: 10px 0 6px; }
+  .muted { color: var(--text-sub); font-size: 12px; line-height: 1.6; }
+
+  /* chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1.5px solid var(--line); background: #fff; color: var(--text-sub);
+    border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer; user-select: none;
+  }
+  .chip.on { background: var(--pink); border-color: var(--pink); color: #fff; font-weight: 600; }
+
+  button.primary {
+    width: 100%; border: none; border-radius: 14px; padding: 14px;
+    background: linear-gradient(135deg, #f296bf, var(--pink)); color: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 10px rgba(229,106,165,.35);
+  }
+  button.primary:active { transform: scale(.98); }
+  button.sub {
+    border: 1.5px solid var(--pink); background: #fff; color: var(--pink);
+    border-radius: 14px; padding: 11px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  button.ghost {
+    border: none; background: var(--pink-light); color: var(--pink-dark);
+    border-radius: 12px; padding: 9px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .btn-row { display: flex; gap: 10px; margin-top: 12px; }
+  .btn-row > * { flex: 1; }
+
+  /* outfit */
+  .outfit-title { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+  .outfit-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 12px; }
+  .oitem {
+    display: flex; gap: 12px; align-items: flex-start; padding: 11px 0;
+    border-top: 1px dashed var(--line);
+  }
+  .oitem .emoji { font-size: 26px; width: 36px; text-align: center; flex-shrink: 0; }
+  .oitem .body { flex: 1; min-width: 0; }
+  .oitem .cat { font-size: 11px; color: var(--text-sub); }
+  .oitem .desc { font-size: 14px; font-weight: 600; line-height: 1.45; }
+  .swatch {
+    display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.12); vertical-align: -2px; margin-right: 4px;
+  }
+  .colorname { font-size: 12px; color: var(--text-sub); }
+  .have {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700;
+    color: var(--ok); background: #eaf7ef; border-radius: 999px; padding: 3px 9px; margin-top: 4px;
+  }
+  .closet-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 10px; flex-shrink: 0; border: 2px solid #d9f0e2; }
+  .shoplinks { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .shoplinks a {
+    font-size: 11px; color: var(--pink-dark); background: var(--pink-light);
+    border-radius: 999px; padding: 3px 10px; text-decoration: none; font-weight: 600;
+  }
+  .tips { background: #f7f2fb; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+  .tips b { font-size: 12px; color: #7d5fb0; }
+  .tips ul { margin: 6px 0 0 16px; }
+  .tips li { font-size: 12px; line-height: 1.7; }
+  .trendtag {
+    display: inline-block; font-size: 10px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg,#f5b84f,#ef8f5a); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: 2px;
+  }
+
+  /* closet */
+  .closet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .citem { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+  .citem img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .citem .noimg { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 34px; background: var(--pink-light); }
+  .citem .meta { padding: 7px 8px; }
+  .citem .meta .n { font-size: 11px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .citem .meta .c { font-size: 10px; color: var(--text-sub); }
+  .citem .del {
+    position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: rgba(0,0,0,.45); color: #fff; font-size: 13px; cursor: pointer; line-height: 1;
+  }
+  select, input[type="text"], input[type="number"], textarea {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 11px 12px; font-size: 14px; background: #fff; color: var(--text); font-family: inherit;
+  }
+  label.fl { display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin: 10px 0 5px; }
+  .photo-drop {
+    border: 2px dashed #ecc6da; border-radius: 14px; padding: 18px; text-align: center;
+    color: var(--text-sub); font-size: 13px; cursor: pointer; background: #fff;
+  }
+  .photo-drop img { max-width: 110px; max-height: 110px; border-radius: 12px; display: block; margin: 0 auto 6px; }
+
+  /* quiz */
+  .qq { font-size: 14px; font-weight: 700; margin-bottom: 10px; line-height: 1.5; }
+  .qopt {
+    display: block; width: 100%; text-align: left; border: 1.5px solid var(--line);
+    background: #fff; border-radius: 12px; padding: 12px 14px; font-size: 13px;
+    margin-bottom: 8px; cursor: pointer; color: var(--text); line-height: 1.5;
+  }
+  .qopt:active { background: var(--pink-light); }
+  .qprog { height: 6px; background: var(--line); border-radius: 999px; margin-bottom: 14px; overflow: hidden; }
+  .qprog > div { height: 100%; background: linear-gradient(90deg,#f296bf,var(--pink)); border-radius: 999px; transition: width .25s; }
+  /* 写真カラーチェック */
+  .gauge {
+    position: relative; height: 14px; border-radius: 999px; margin: 14px 4px 6px;
+    background: linear-gradient(90deg, #7ea6d9, #e8cfd8 50%, #f0c777);
+  }
+  .gauge .mark {
+    position: absolute; top: -5px; width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--pink); transform: translateX(-50%);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25); box-sizing: border-box;
+  }
+  .gauge-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-sub); padding: 0 2px; }
+  .skin-swatch { display: inline-block; width: 20px; height: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); vertical-align: -5px; margin-right: 6px; }
+
+  .result-badge {
+    display: inline-block; background: linear-gradient(135deg,#f296bf,var(--lavender));
+    color: #fff; font-weight: 700; font-size: 15px; border-radius: 999px; padding: 8px 20px; margin: 6px 0;
+  }
+  .palette { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .palette .pcol { text-align: center; font-size: 10px; color: var(--text-sub); width: 52px; }
+  .palette .pcol span { display: block; width: 40px; height: 40px; border-radius: 12px; margin: 0 auto 3px; border: 1px solid rgba(0,0,0,.08); }
+
+  /* bottom nav */
+  nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+    background: rgba(255,255,255,.96); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav button {
+    flex: 1; border: none; background: none; padding: 9px 0 7px; cursor: pointer;
+    font-size: 10px; color: var(--text-sub); font-weight: 600;
+  }
+  nav button .ic { display: block; font-size: 21px; margin-bottom: 2px; }
+  nav button.on { color: var(--pink); }
+
+  .empty { text-align: center; color: var(--text-sub); font-size: 13px; padding: 26px 10px; line-height: 1.8; }
+  .fav-outfit { border-left: 4px solid var(--pink); }
+  .toast {
+    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
+    background: rgba(74,58,68,.92); color: #fff; font-size: 13px; padding: 10px 20px;
+    border-radius: 999px; z-index: 50; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+  .profile-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .ptag { font-size: 11px; font-weight: 700; background: var(--pink-light); color: var(--pink-dark); border-radius: 999px; padding: 5px 12px; }
+  .trend-card { border-left: 4px solid #f5b84f; }
+  .trend-card h3 { color: #d98a2b; margin-top: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎀 マイコーデ</h1>
+  <p>150cmのわたしに、いちばん似合う可愛いを。</p>
+</header>
+
+<main>
+
+  <!-- ========== 提案タブ ========== -->
+  <section id="pane-suggest" class="tab-pane active">
+    <div id="onboarding" class="card" style="display:none">
+      <h2>👗 はじめまして!</h2>
+      <p class="muted" style="margin-bottom:12px">
+        あなたの骨格タイプとパーソナルカラーがわかると、ぐっと似合うコーデを提案できます。<br>
+        まずは <b>診断タブ</b> でかんたん診断(各1分)をしてみてね。診断せずに提案を見ることもできます。
+      </p>
+      <button class="primary" onclick="switchTab('diagnose')">診断してみる ✨</button>
+    </div>
+
+    <div class="card" id="profileSummaryCard" style="display:none">
+      <div class="profile-summary" id="profileSummary"></div>
+    </div>
+
+    <div class="card">
+      <h2>💭 きょうの気分は?</h2>
+      <h3>テイスト</h3>
+      <div class="chips" id="tasteChips"></div>
+      <h3>季節</h3>
+      <div class="chips" id="seasonChips"></div>
+      <div class="btn-row">
+        <button class="primary" onclick="suggest()">コーデを提案してもらう 🪄</button>
+      </div>
+    </div>
+
+    <div id="outfitArea"></div>
+
+    <div class="card" id="favList" style="display:none">
+      <h2>💖 お気に入りコーデ</h2>
+      <div id="favItems"></div>
+    </div>
+  </section>
+
+  <!-- ========== クローゼットタブ ========== -->
+  <section id="pane-closet" class="tab-pane">
+    <div class="card">
+      <h2>📸 服を登録する</h2>
+      <p class="muted">持っている服を写真つきで登録すると、コーデ提案のときに「手持ちの服」から組み合わせてくれます。</p>
+      <label class="fl">写真(タップして選択・撮影)</label>
+      <div class="photo-drop" id="photoDrop" onclick="document.getElementById('photoInput').click()">
+        <span id="photoDropText">🖼️ 写真を選ぶ / 撮る</span>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none">
+      <label class="fl">カテゴリ</label>
+      <select id="ciCat"></select>
+      <label class="fl">色</label>
+      <select id="ciColor"></select>
+      <label class="fl">名前・メモ(例:お気に入りのリブニット)</label>
+      <input type="text" id="ciName" placeholder="なんの服かわかる名前">
+      <div class="btn-row">
+        <button class="primary" onclick="addClosetItem()">クローゼットに追加 ➕</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>👚 マイクローゼット <span id="closetCount" class="muted"></span></h2>
+      <div id="closetGrid" class="closet-grid"></div>
+      <div id="closetEmpty" class="empty">まだ服が登録されていません。<br>上のフォームから追加してね 🧺</div>
+    </div>
+  </section>
+
+  <!-- ========== 診断タブ ========== -->
+  <section id="pane-diagnose" class="tab-pane">
+    <div class="card">
+      <h2>🦴 骨格タイプ診断</h2>
+      <p class="muted">体のラインの特徴から、スタイルアップして見える服の形がわかります。</p>
+      <div id="skelResult"></div>
+      <div id="skelQuiz" style="display:none"></div>
+      <div class="btn-row"><button class="sub" onclick="startQuiz('skel')" id="skelStartBtn">診断をはじめる</button></div>
+    </div>
+    <div class="card">
+      <h2>🎨 パーソナルカラー診断</h2>
+      <p class="muted">イエベ・ブルベと明るさのタイプから、顔うつりの良い色がわかります。</p>
+      <div id="pcResult"></div>
+      <div id="pcQuiz" style="display:none"></div>
+      <div class="btn-row"><button class="sub" onclick="startQuiz('pc')" id="pcStartBtn">診断をはじめる</button></div>
+    </div>
+    <div class="card">
+      <h2>📷 写真でカラーチェック<span class="muted" style="font-size:11px">(参考)</span></h2>
+      <p class="muted">顔写真から肌の色みを読み取って、イエベ/ブルベの傾向をチェックします。<b>自然光・ノーフィルター</b>の写真がおすすめ。写真はこの端末の中だけで処理され、保存も送信もされません。</p>
+      <div class="photo-drop" id="pcPhotoDrop" onclick="document.getElementById('pcPhotoInput').click()" style="margin-top:10px">
+        <span>📷 写真を選ぶ / 撮る</span>
+      </div>
+      <input type="file" id="pcPhotoInput" accept="image/*" style="display:none">
+      <div id="pcPhotoResult"></div>
+    </div>
+  </section>
+
+  <!-- ========== トレンドタブ ========== -->
+  <section id="pane-trend" class="tab-pane">
+    <div class="card">
+      <h2>🔥 2026年のトレンド</h2>
+      <p class="muted">今シーズンおさえておきたいキーワード。コーデ提案にも自動で反映されています。</p>
+    </div>
+    <div id="trendCards"></div>
+  </section>
+
+  <!-- ========== 設定タブ ========== -->
+  <section id="pane-settings" class="tab-pane">
+    <div class="card">
+      <h2>👤 プロフィール</h2>
+      <div class="grid2">
+        <div><label class="fl">身長(cm)</label><input type="number" id="setHeight" inputmode="decimal"></div>
+        <div><label class="fl">体重(kg)</label><input type="number" id="setWeight" inputmode="decimal"></div>
+      </div>
+      <label class="fl">骨格タイプ(診断でも設定できます)</label>
+      <select id="setSkel">
+        <option value="">未設定</option>
+        <option value="straight">ストレート</option>
+        <option value="wave">ウェーブ</option>
+        <option value="natural">ナチュラル</option>
+      </select>
+      <label class="fl">パーソナルカラー(診断でも設定できます)</label>
+      <select id="setPC">
+        <option value="">未設定</option>
+        <option value="spring">イエベ春(スプリング)</option>
+        <option value="summer">ブルベ夏(サマー)</option>
+        <option value="autumn">イエベ秋(オータム)</option>
+        <option value="winter">ブルベ冬(ウィンター)</option>
+      </select>
+    </div>
+    <div class="card">
+      <h2>💕 好みのカスタマイズ</h2>
+      <label class="fl">好きなテイスト(いくつでも)</label>
+      <div class="chips" id="setTastes"></div>
+      <label class="fl">好きな色(いくつでも)</label>
+      <div class="chips" id="setColors"></div>
+      <label class="fl">苦手・着たくないもの(例:ミニスカート、肩出し)</label>
+      <input type="text" id="setNG" placeholder="「、」区切りで入力">
+      <div class="btn-row">
+        <button class="primary" onclick="saveSettings()">保存する 💾</button>
+      </div>
+    </div>
+    <div class="card">
+      <p class="muted">データはすべてこの端末の中だけに保存されます。トレンド情報:2026年春夏(レッド・ネイビー・シアー素材・レースキャミ ほか)</p>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button data-tab="suggest" class="on"><span class="ic">🪄</span>提案</button>
+  <button data-tab="closet"><span class="ic">👚</span>クローゼット</button>
+  <button data-tab="diagnose"><span class="ic">🎨</span>診断</button>
+  <button data-tab="trend"><span class="ic">🔥</span>トレンド</button>
+  <button data-tab="settings"><span class="ic">⚙️</span>設定</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   マスターデータ
+============================================================ */
+const TASTES = ['ガーリー','フェミニン','きれいめ','カジュアル','韓国っぽ','モード'];
+const SEASONS = { spring:'春', summer:'夏', autumn:'秋', winter:'冬' };
+const CATS = ['トップス','ボトムス','ワンピース','アウター','シューズ','バッグ','アクセサリー'];
+const CAT_EMOJI = { 'トップス':'👚','ボトムス':'👖','ワンピース':'👗','アウター':'🧥','シューズ':'👟','バッグ':'👜','アクセサリー':'📿' };
+
+// 色マスター(クローゼット登録用 + マッチング用)
+const COLORS = [
+  ['白・オフホワイト','#f7f4ef'],['アイボリー','#fff3dd'],['黒','#26232a'],['グレー','#b9b6bd'],
+  ['ベージュ','#e3cfae'],['ブラウン・モカ','#8b6f5c'],['キャメル','#c19a6b'],['ネイビー','#26335c'],
+  ['ブルー・水色','#a9d3ea'],['ラベンダー','#c3b1e1'],['ピンク','#f4a7b9'],['コーラル','#ff9e8e'],
+  ['レッド','#cf3a4f'],['ワインレッド','#7b2440'],['イエロー','#f5d05c'],['マスタード','#d4a72c'],
+  ['グリーン・オリーブ','#7a8450'],['テラコッタ','#c96f4a'],['デニム','#5b7b9e'],['柄もの','#e8b7d9'],
+];
+const NEUTRALS = ['白・オフホワイト','アイボリー','黒','グレー','ベージュ','デニム'];
+
+// パーソナルカラー別パレット([名前, hex, ベース?, 2026トレンド?])
+const PC = {
+  spring: { label:'イエベ春(スプリング)', desc:'明るくツヤのある色が得意。黄みのあるフレッシュなカラーで、顔まわりがパッと華やぎます。',
+    colors: [
+      ['アイボリー','#fff3dd',1,0],['ライトベージュ','#ead9be',1,0],['コーラルピンク','#ff9e8e',0,0],
+      ['ブライトレッド','#e8484f',0,1],['ライトイエロー','#ffd95c',0,1],['若草グリーン','#b5e48c',0,0],
+      ['キャメル','#c19a6b',1,0],['アプリコット','#ffb277',0,0],
+    ]},
+  summer: { label:'ブルベ夏(サマー)', desc:'やわらかくスモーキーな色が得意。青みのある上品なパステルで、透明感が引き立ちます。',
+    colors: [
+      ['オフホワイト','#f5f3f0',1,0],['グレージュ','#c8bfc0',1,0],['ローズピンク','#f4a7b9',0,0],
+      ['ラベンダー','#c3b1e1',0,0],['ベビーブルー','#a8d8ea',0,0],['ソフトネイビー','#3d5a80',1,1],
+      ['ライトグレー','#d3d3d3',1,0],['ラズベリーレッド','#b04a5e',0,1],
+    ]},
+  autumn: { label:'イエベ秋(オータム)', desc:'深みのあるこっくりカラーが得意。黄みのあるリッチな色で、大人っぽく品よく決まります。',
+    colors: [
+      ['アイボリー','#f3ead8',1,0],['キャメル','#c19a6b',1,0],['モカブラウン','#8b6f5c',1,1],
+      ['テラコッタ','#c96f4a',0,0],['オリーブグリーン','#7a8450',0,1],['マスタード','#d4a72c',0,1],
+      ['ダークレッド','#a63a2e',0,1],['サーモンベージュ','#e8b48f',0,0],
+    ]},
+  winter: { label:'ブルベ冬(ウィンター)', desc:'コントラストの効いたはっきりした色が得意。鮮やかカラーやモノトーンがシャープに映えます。',
+    colors: [
+      ['ピュアホワイト','#ffffff',1,0],['ブラック','#26232a',1,0],['ネイビー','#1f2a55',1,1],
+      ['ロイヤルブルー','#2b4c9b',0,0],['フューシャピンク','#d3387f',0,0],['ワインレッド','#7b2440',0,1],
+      ['アイシーブルー','#d6e6f2',0,0],['トゥルーレッド','#c8102e',0,1],
+    ]},
+};
+
+// 骨格タイプ
+const SKEL = {
+  straight: { label:'ストレート', desc:'メリハリのある立体的なボディ。ジャストサイズ&シンプルなきれいめアイテムで、上質にまとまります。',
+    good:'Vネック・ジャストサイズ・ハリのある素材・タイトスカート・センタープレスパンツ',
+    tip:'胸元はVやUで抜けを作り、ウエスト位置がわかるジャストサイズを選ぶとすっきり見えます。' },
+  wave: { label:'ウェーブ', desc:'華奢で曲線的なボディ。やわらか素材&ハイウエストのフィット/フレアが最高に得意です。',
+    good:'ハイウエスト・ふんわり素材・フィット&フレア・ショート丈トップス・リボンやフリル',
+    tip:'重心を上げるのがコツ。トップスはコンパクトに、ボトムはハイウエストでスタイルアップ!' },
+  natural: { label:'ナチュラル', desc:'骨格がしっかりしたスタイリッシュなボディ。ラフなゆったりシルエットがこなれて見えます。',
+    good:'ゆったりシルエット・リネンやデニムの風合い素材・ロング丈・ドロップショルダー',
+    tip:'ゆるっと感が味方。ただし150cmさんは「上下どちらかだけゆったり」でバランスを取って。' },
+};
+
+// 150cm・37kg(華奢な低身長さん)向け共通テクニック
+const PETITE_TIPS = [
+  'ハイウエストで脚長見え。トップスは前だけインが鉄板!',
+  'ワンピースは膝丈〜ミモレ丈のIライン/Aラインが得意。',
+  'バッグは小ぶりを選ぶと全身のバランスが良く見えます。',
+  '首・手首・足首の「3首見せ」で華奢さを活かして抜け感を。',
+  'ロングスカートは足首が見える丈 or 前スリット入りを選ぶと重くならない。',
+  'アウターはショート丈が最強。ロングなら薄手で縦ラインを強調。',
+  'ワントーン or 上下同系色でつなげると身長がすらっと見えます。',
+];
+
+// 2026年トレンド(検索ベース)
+const TRENDS = [
+  { key:'シアートップス', emoji:'🫧', text:'透け感のある軽やかなシアー素材。キャミやタンクを重ねて抜け感を。華奢な体型と好相性で、着ぶくれ知らず。' },
+  { key:'レースキャミ重ね', emoji:'🎀', text:'Tシャツやシャツのインナーにレースキャミをちら見せ。ガーリー好きさんの2026年マストアイテム。' },
+  { key:'レッド', emoji:'❤️', text:'今年の主役カラー。小物から取り入れても、ワンピで主役にしても◎。パーソナルカラーに合う赤み(朱赤/ワイン)を選んで。' },
+  { key:'ネイビー', emoji:'🌊', text:'黒に代わる新ベーシック。きれいめにもカジュアルにも使えて、小柄さんでも重たく見えにくい。' },
+  { key:'ホワイトボトム', emoji:'🤍', text:'清涼感のある白パンツ・白スカート。どんな色とも合わせやすく、夏コーデがぐっと今年っぽく。' },
+  { key:'オリーブグリーン', emoji:'🫒', text:'注目のグリーン系。イエベ秋さんはど真ん中。カジュアル・ナチュラル系コーデの鮮度アップに。' },
+  { key:'モカブラウン', emoji:'🤎', text:'大人女性から絶大な支持のこっくりブラウン。ワントーンでまとめると一気に今年顔。' },
+  { key:'セットアップ(イエロー系)', emoji:'💛', text:'上下おそろいのセットアップが引き続き人気。低身長さんはワントーンで縦につながって脚長効果も。' },
+];
+
+/* ============================================================
+   コーデレシピ(テイスト×季節×骨格)
+   items: [カテゴリ, アイテム名, 色ロール(base/main/accent/固定色名), トレンドキーワード or null]
+============================================================ */
+const RECIPES = [
+  // --- ガーリー ---
+  { name:'レースキャミ×ふんわりスカートの王道ガーリー', tastes:['ガーリー'], seasons:['spring','summer'],
+    skel:{straight:1,wave:3,natural:1}, trend:['レースキャミ重ね'],
+    items:[['トップス','コンパクトTシャツ+レースキャミ重ね','base','レースキャミ重ね'],['ボトムス','ハイウエストのふんわりフレアスカート(膝下丈)','main',null],['シューズ','ストラップつきバレエシューズ','base',null],['バッグ','ミニサイズのかごバッグ','base',null],['アクセサリー','リボンバレッタ','accent',null]] },
+  { name:'シアーブラウスの甘めワントーン', tastes:['ガーリー','フェミニン'], seasons:['spring','summer'],
+    skel:{straight:2,wave:3,natural:1}, trend:['シアートップス'],
+    items:[['トップス','シアーブラウス(インナーキャミ付き)','main','シアートップス'],['ボトムス','同系色のマーメイドスカート','main',null],['シューズ','厚底サンダル(5cmで身長アップ)','base',null],['バッグ','ミニショルダー','accent',null]] },
+  { name:'ニット×チュールのあまあまコーデ', tastes:['ガーリー'], seasons:['autumn','winter'],
+    skel:{straight:1,wave:3,natural:1}, trend:[],
+    items:[['トップス','ショート丈のふわふわニット','main',null],['ボトムス','チュールスカート(ミモレ丈)','base',null],['アウター','ノーカラーのショートコート','base',null],['シューズ','ソックス×ストラップシューズ','base',null],['アクセサリー','パールのヘアピン','accent',null]] },
+  // --- フェミニン ---
+  { name:'とろみワンピの大人フェミニン', tastes:['フェミニン'], seasons:['spring','summer'],
+    skel:{straight:2,wave:3,natural:2}, trend:['レッド'],
+    items:[['ワンピース','ウエストマークつきのとろみワンピ(ミモレ丈)','main','レッド'],['シューズ','ポインテッドフラット','base',null],['バッグ','小ぶりのハンドバッグ','base',null],['アクセサリー','華奢なネックレス','accent',null]] },
+  { name:'ブラウス×プリーツの通勤もOKフェミニン', tastes:['フェミニン','きれいめ'], seasons:['spring','autumn'],
+    skel:{straight:3,wave:3,natural:2}, trend:[],
+    items:[['トップス','ボウタイ or フリル衿ブラウス','base',null],['ボトムス','ハイウエストのプリーツスカート','main',null],['シューズ','5cmヒールパンプス','base',null],['バッグ','きちんと見えのミニトート','main',null]] },
+  { name:'カーデ×フレアの上品ぬくもりコーデ', tastes:['フェミニン'], seasons:['autumn','winter'],
+    skel:{straight:2,wave:3,natural:2}, trend:['モカブラウン'],
+    items:[['トップス','ビジューボタンのコンパクトカーディガン','main','モカブラウン'],['ボトムス','起毛フレアスカート','base',null],['アウター','ファー衿つきショートコート','base',null],['シューズ','ショートブーツ','base',null]] },
+  // --- きれいめ ---
+  { name:'センタープレスパンツのきれいめスタイル', tastes:['きれいめ'], seasons:['spring','autumn'],
+    skel:{straight:3,wave:2,natural:2}, trend:['ネイビー'],
+    items:[['トップス','とろみ素材のVネックブラウス','base',null],['ボトムス','ハイウエストのセンタープレスパンツ(足首丈)','main','ネイビー'],['シューズ','ポインテッドパンプス','base',null],['バッグ','スクエアのミニバッグ','main',null],['アクセサリー','メタルの華奢バングル','accent',null]] },
+  { name:'白ボトムの爽やかきれいめ', tastes:['きれいめ','フェミニン'], seasons:['summer'],
+    skel:{straight:3,wave:2,natural:2}, trend:['ホワイトボトム'],
+    items:[['トップス','ノースリーブのきれいめニット','main',null],['ボトムス','白のセミフレアパンツ','白・オフホワイト','ホワイトボトム'],['シューズ','ヌーディーカラーのサンダル','base',null],['バッグ','ミニかごクラッチ','base',null]] },
+  { name:'ワントーンセットアップの縦長コーデ', tastes:['きれいめ','モード'], seasons:['spring','autumn'],
+    skel:{straight:3,wave:2,natural:3}, trend:['セットアップ(イエロー系)'],
+    items:[['トップス','セットアップのノーカラージャケット','main','セットアップ(イエロー系)'],['ボトムス','同色のテーパードパンツ','main',null],['シューズ','ヒールローファー','base',null],['バッグ','ミニハンドバッグ','base',null]] },
+  { name:'ニット×ナロースカートの大人きれいめ', tastes:['きれいめ'], seasons:['autumn','winter'],
+    skel:{straight:3,wave:2,natural:2}, trend:['モカブラウン'],
+    items:[['トップス','ハイゲージのコンパクトニット','base',null],['ボトムス','ナロースカート(前スリット)','main','モカブラウン'],['アウター','チェスターコート(膝上丈)','main',null],['シューズ','ロングブーツ','base',null]] },
+  // --- カジュアル ---
+  { name:'白T×デニムの鉄板カジュアル', tastes:['カジュアル'], seasons:['spring','summer'],
+    skel:{straight:2,wave:2,natural:3}, trend:['レッド'],
+    items:[['トップス','コンパクトな白Tシャツ(前だけイン)','白・オフホワイト',null],['ボトムス','ハイウエストのストレートデニム','デニム',null],['シューズ','ローカットスニーカー','accent','レッド'],['バッグ','ミニショルダー','accent',null],['アクセサリー','キャップ or ヘアクリップ','base',null]] },
+  { name:'ボーダー×白ボトムのマリンカジュアル', tastes:['カジュアル'], seasons:['summer'],
+    skel:{straight:2,wave:2,natural:3}, trend:['ホワイトボトム','ネイビー'],
+    items:[['トップス','ボーダーのコンパクトカットソー','main','ネイビー'],['ボトムス','白のワイドパンツ(足首見せ)','白・オフホワイト','ホワイトボトム'],['シューズ','キャンバススニーカー','base',null],['バッグ','キャンバスのミニトート','base',null]] },
+  { name:'スウェット×スカートのゆるあまMIX', tastes:['カジュアル','ガーリー'], seasons:['autumn','winter'],
+    skel:{straight:1,wave:2,natural:3}, trend:['オリーブグリーン'],
+    items:[['トップス','ショート丈スウェット','main','オリーブグリーン'],['ボトムス','ロングのプリーツスカート(足首見え)','base',null],['シューズ','ボリュームスニーカー','base',null],['バッグ','ナイロンのミニリュック','base',null]] },
+  { name:'パーカー×デニムのゆるっとカジュアル', tastes:['カジュアル'], seasons:['autumn','winter','spring'],
+    skel:{straight:1,wave:1,natural:3}, trend:['モカブラウン'],
+    items:[['トップス','ややゆるパーカー(お尻にかからない丈)','main','モカブラウン'],['ボトムス','ハイウエストのテーパードデニム','デニム',null],['アウター','ボアのショートブルゾン','base',null],['シューズ','スニーカー','base',null]] },
+  // --- 韓国っぽ ---
+  { name:'クロップドニット×ハイウエストの韓国っぽ', tastes:['韓国っぽ'], seasons:['spring','autumn'],
+    skel:{straight:2,wave:3,natural:1}, trend:[],
+    items:[['トップス','クロップド丈のリブニット','main',null],['ボトムス','ハイウエストのワイドスラックス','base',null],['シューズ','厚底ローファー(3〜5cmアップ)','base',null],['バッグ','ミニショルダー','accent',null],['アクセサリー','シルバー系ピアス','base',null]] },
+  { name:'シアー×ナロースカートの大人韓国っぽ', tastes:['韓国っぽ','モード'], seasons:['summer'],
+    skel:{straight:2,wave:3,natural:2}, trend:['シアートップス'],
+    items:[['トップス','シアーカーディガン+キャミ','main','シアートップス'],['ボトムス','ナローロングスカート(スリット入り)','base',null],['シューズ','スポーツサンダル or ミュール','base',null],['バッグ','ミニクロスボディ','main',null]] },
+  { name:'ショートアウター×ロングスカートの韓国冬コーデ', tastes:['韓国っぽ'], seasons:['winter'],
+    skel:{straight:2,wave:3,natural:2}, trend:['ネイビー'],
+    items:[['アウター','クロップド丈のダウン or ムートン','main','ネイビー'],['トップス','ハイネックのコンパクトニット','base',null],['ボトムス','ロングナロースカート','base',null],['シューズ','厚底ショートブーツ','base',null],['アクセサリー','マフラーぐるぐる巻き','accent',null]] },
+  // --- モード ---
+  { name:'オールブラック風ワントーンモード', tastes:['モード'], seasons:['autumn','winter'],
+    skel:{straight:3,wave:1,natural:3}, trend:['ネイビー'],
+    items:[['トップス','ハイネックの薄手ニット','main','ネイビー'],['ボトムス','ハイウエストのワイドパンツ(フルレングス)','main',null],['シューズ','厚底のレザーシューズ','base',null],['バッグ','ミニのスクエアバッグ','accent',null],['アクセサリー','大ぶりイヤーカフ','base',null]] },
+  { name:'赤の差し色モードカジュアル', tastes:['モード','カジュアル'], seasons:['spring','summer'],
+    skel:{straight:3,wave:2,natural:3}, trend:['レッド'],
+    items:[['トップス','ミニマルな白カットソー','白・オフホワイト',null],['ボトムス','ナローのロングスカート','base',null],['シューズ','ローファー','base',null],['バッグ','赤のミニバッグで差し色','accent','レッド'],['アクセサリー','シルバーのフープピアス','base',null]] },
+  { name:'ジレ×ワイドのモードセットアップ', tastes:['モード','きれいめ'], seasons:['spring','autumn'],
+    skel:{straight:3,wave:1,natural:3}, trend:['セットアップ(イエロー系)'],
+    items:[['トップス','ロングジレ+コンパクトT','main','セットアップ(イエロー系)'],['ボトムス','同色ワイドパンツ','main',null],['シューズ','ポインテッドフラット','base',null],['バッグ','ハンドル付きミニバッグ','base',null]] },
+  // --- ワンピース系(汎用) ---
+  { name:'ティアードワンピのナチュラル可愛いコーデ', tastes:['ガーリー','カジュアル'], seasons:['spring','summer'],
+    skel:{straight:1,wave:2,natural:3}, trend:['オリーブグリーン'],
+    items:[['ワンピース','ティアードワンピ(足首が見える丈)','main','オリーブグリーン'],['シューズ','フラットサンダル','base',null],['バッグ','かごバッグ','base',null],['アクセサリー','細ベルトでウエストマーク','accent',null]] },
+  { name:'ニットワンピ×ブーツの冬ワンピコーデ', tastes:['フェミニン','韓国っぽ'], seasons:['winter'],
+    skel:{straight:2,wave:3,natural:2}, trend:['モカブラウン'],
+    items:[['ワンピース','リブニットワンピ(ミモレ丈)+細ベルト','main','モカブラウン'],['アウター','ショート丈のケープコート','base',null],['シューズ','ロングブーツ','base',null],['バッグ','ミニハンドバッグ','accent',null]] },
+];
+
+/* ============================================================
+   状態管理
+============================================================ */
+const LS_KEY = 'mycoorde.profile';
+const FAV_KEY = 'mycoorde.favorites';
+let profile = loadProfile();
+let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+let closet = [];
+let currentOutfit = null;
+let uiTaste = null, uiSeason = null;
+
+function loadProfile() {
+  const def = { height:150, weight:37, skeleton:null, pc:null, tastes:['ガーリー'], favColors:[], ng:'' };
+  try { return Object.assign(def, JSON.parse(localStorage.getItem(LS_KEY) || '{}')); }
+  catch { return def; }
+}
+function saveProfile() { localStorage.setItem(LS_KEY, JSON.stringify(profile)); renderProfileSummary(); }
+
+/* ---------- IndexedDB(クローゼット写真用) ---------- */
+let db;
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('mycoorde-db', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('closet', { keyPath:'id' });
+    req.onsuccess = () => { db = req.result; res(); };
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbAll() {
+  return new Promise((res) => {
+    const tx = db.transaction('closet').objectStore('closet').getAll();
+    tx.onsuccess = () => res(tx.result || []);
+    tx.onerror = () => res([]);
+  });
+}
+function idbPut(item) {
+  return new Promise((res) => {
+    const tx = db.transaction('closet','readwrite');
+    tx.objectStore('closet').put(item);
+    tx.oncomplete = res;
+  });
+}
+function idbDel(id) {
+  return new Promise((res) => {
+    const tx = db.transaction('closet','readwrite');
+    tx.objectStore('closet').delete(id);
+    tx.oncomplete = res;
+  });
+}
+
+/* ============================================================
+   タブ
+============================================================ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   提案タブ
+============================================================ */
+function currentSeason() {
+  const m = new Date().getMonth() + 1;
+  if (m >= 3 && m <= 5) return 'spring';
+  if (m >= 6 && m <= 8) return 'summer';
+  if (m >= 9 && m <= 11) return 'autumn';
+  return 'winter';
+}
+
+function renderSuggestControls() {
+  uiTaste = uiTaste || (profile.tastes[0] || 'ガーリー');
+  uiSeason = uiSeason || currentSeason();
+  const tc = document.getElementById('tasteChips');
+  tc.innerHTML = TASTES.map(t =>
+    `<span class="chip ${t===uiTaste?'on':''}" onclick="uiTaste='${t}';renderSuggestControls()">${t}</span>`).join('');
+  const sc = document.getElementById('seasonChips');
+  sc.innerHTML = Object.entries(SEASONS).map(([k,v]) =>
+    `<span class="chip ${k===uiSeason?'on':''}" onclick="uiSeason='${k}';renderSuggestControls()">${v}</span>`).join('');
+}
+
+function renderProfileSummary() {
+  const card = document.getElementById('profileSummaryCard');
+  const el = document.getElementById('profileSummary');
+  const tags = [`📏 ${profile.height}cm・${profile.weight}kg`];
+  if (profile.skeleton) tags.push('🦴 骨格' + SKEL[profile.skeleton].label);
+  if (profile.pc) tags.push('🎨 ' + PC[profile.pc].label);
+  tags.push(...profile.tastes.map(t => '💕 ' + t));
+  el.innerHTML = tags.map(t => `<span class="ptag">${t}</span>`).join('');
+  card.style.display = 'block';
+  document.getElementById('onboarding').style.display = (profile.skeleton && profile.pc) ? 'none' : 'block';
+}
+
+// パレットから役割ごとに色を選ぶ
+function pickColors(pcKey) {
+  const pal = PC[pcKey || 'spring'].colors.slice();
+  const bases = pal.filter(c => c[2]);
+  const mains = pal.filter(c => !c[2]);
+  const trendMains = mains.filter(c => c[3]);
+  // 好きな色を優先
+  const liked = (name) => profile.favColors.some(f => name.includes(f.replace(/・.*/,'')) || f.includes(name));
+  const pick = (arr) => {
+    const fav = arr.filter(c => liked(c[0]));
+    const pool = fav.length && Math.random() < .6 ? fav : arr;
+    return pool[Math.floor(Math.random() * pool.length)];
+  };
+  return {
+    base: pick(bases),
+    main: pick(Math.random() < .5 && trendMains.length ? trendMains : mains),
+    accent: pick(mains),
+  };
+}
+
+function colorHexByName(name) {
+  const hit = COLORS.find(c => c[0] === name);
+  return hit ? hit[1] : '#ddd';
+}
+
+// クローゼットから合う服を探す
+function findClosetMatch(cat, colorName) {
+  const inCat = closet.filter(i => i.category === cat);
+  if (!inCat.length) return null;
+  const short = colorName.replace(/・.*/, '');
+  const exact = inCat.find(i => i.color.includes(short) || short.includes(i.color.replace(/・.*/,'')) ||
+    (NEUTRALS.includes(i.color) && NEUTRALS.includes(colorName)));
+  return exact ? { item: exact, exact: true } : { item: inCat[0], exact: false };
+}
+
+function shopLinks(query) {
+  const q = encodeURIComponent(query);
+  return `<span class="shoplinks">
+    <a href="https://zozo.jp/search/?p_keyv=${q}" target="_blank" rel="noopener">ZOZOで探す</a>
+    <a href="https://www.uniqlo.com/jp/ja/search?q=${q}" target="_blank" rel="noopener">UNIQLO</a>
+    <a href="https://www.gu-global.com/jp/ja/search?q=${q}" target="_blank" rel="noopener">GU</a>
+    <a href="https://wear.jp/search/?text=${q}" target="_blank" rel="noopener">WEARでコーデ検索</a>
+  </span>`;
+}
+
+function ngHit(text) {
+  const ngs = (profile.ng || '').split(/[、,\s]+/).filter(Boolean);
+  return ngs.some(n => text.includes(n));
+}
+
+function suggest() {
+  const skel = profile.skeleton;
+  // 候補をスコアリング
+  let pool = RECIPES.filter(r => r.seasons.includes(uiSeason) && r.tastes.includes(uiTaste));
+  if (!pool.length) pool = RECIPES.filter(r => r.seasons.includes(uiSeason));
+  pool = pool.filter(r => !r.items.some(it => ngHit(it[1])));
+  if (!pool.length) { toast('条件に合うコーデが見つかりませんでした🥲'); return; }
+  const scored = pool.map(r => {
+    let s = Math.random() * 2;
+    if (skel) s += (r.skel[skel] || 0) * 1.5;
+    if (r.trend.length) s += 1;
+    if (currentOutfit && currentOutfit.recipeName === r.name) s -= 3; // シャッフルで同じものを避ける
+    return [s, r];
+  }).sort((a,b) => b[0] - a[0]);
+  const recipe = scored[0][1];
+  const roles = pickColors(profile.pc);
+
+  const items = recipe.items.map(([cat, desc, role, trendKey]) => {
+    let colorName, hex;
+    if (role === 'base' || role === 'main' || role === 'accent') {
+      [colorName, hex] = roles[role];
+    } else {
+      colorName = role; hex = colorHexByName(role);
+    }
+    const match = findClosetMatch(cat, colorName);
+    return { cat, desc, colorName, hex, trendKey, match };
+  });
+
+  const tipList = [];
+  if (skel) tipList.push('【骨格' + SKEL[skel].label + '】' + SKEL[skel].tip);
+  if (profile.pc) tipList.push('【' + PC[profile.pc].label.split('(')[0].trim() + '】顔まわり(トップス)にパーソナルカラーを持ってくると美肌見え◎');
+  tipList.push('【150cmさん】' + PETITE_TIPS[Math.floor(Math.random() * PETITE_TIPS.length)]);
+
+  currentOutfit = {
+    recipeName: recipe.name, taste: uiTaste, season: uiSeason,
+    items, tips: tipList, ts: Date.now(),
+  };
+  renderOutfit();
+}
+
+function renderOutfit() {
+  const area = document.getElementById('outfitArea');
+  if (!currentOutfit) { area.innerHTML = ''; return; }
+  const o = currentOutfit;
+  const rows = o.items.map(it => {
+    let right = '';
+    if (it.match && it.match.exact) {
+      const img = it.match.item.photo ? `<img class="closet-thumb" src="${it.match.item.photo}" alt="">` : '';
+      right = `<span class="have">✔ 手持ちの「${esc(it.match.item.name || it.match.item.color + 'の' + it.cat)}」でOK!</span>`;
+      return row(it, right, img);
+    }
+    if (it.match && !it.match.exact) {
+      right = `<span class="have" style="color:#b08a2e;background:#fdf3dd">△ 手持ちの${it.cat}(${esc(it.match.item.color)})でも代用OK</span>` +
+        shopLinks(it.colorName.replace(/・.*/,'') + ' ' + shortDesc(it.desc));
+      return row(it, right, '');
+    }
+    right = shopLinks(it.colorName.replace(/・.*/,'') + ' ' + shortDesc(it.desc));
+    return row(it, right, '');
+  }).join('');
+
+  area.innerHTML = `<div class="card">
+    <div class="outfit-title">🪄 ${esc(o.recipeName)}</div>
+    <div class="outfit-sub">${esc(o.taste)} × ${SEASONS[o.season]}コーデ</div>
+    ${rows}
+    <div class="tips"><b>💡 似合わせポイント</b><ul>${o.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
+    <div class="btn-row">
+      <button class="ghost" onclick="suggest()">🔄 別の提案</button>
+      <button class="primary" onclick="saveFavorite()">💖 お気に入り保存</button>
+    </div>
+  </div>`;
+
+  function row(it, right, img) {
+    return `<div class="oitem">
+      <span class="emoji">${CAT_EMOJI[it.cat] || '👗'}</span>
+      <div class="body">
+        <div class="cat">${it.cat}</div>
+        <div class="desc">${esc(it.desc)}${it.trendKey ? '<span class="trendtag">2026トレンド</span>' : ''}</div>
+        <div class="colorname"><span class="swatch" style="background:${it.hex}"></span>${esc(it.colorName)}</div>
+        ${right}
+      </div>${img}
+    </div>`;
+  }
+}
+function shortDesc(d) {
+  // 検索ワード用にアイテム名の主要部分だけ抜く
+  return d.replace(/[(（][^)）]*[)）]/g, '').replace(/[+＋].*/, '').trim().split(/\s/)[0].slice(0, 14);
+}
+
+function saveFavorite() {
+  if (!currentOutfit) return;
+  favorites.unshift(JSON.parse(JSON.stringify(currentOutfit)));
+  favorites = favorites.slice(0, 30);
+  localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+  renderFavorites();
+  toast('お気に入りに保存しました 💖');
+}
+function removeFavorite(i) {
+  favorites.splice(i, 1);
+  localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+  renderFavorites();
+}
+function renderFavorites() {
+  const wrap = document.getElementById('favList');
+  const el = document.getElementById('favItems');
+  if (!favorites.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  el.innerHTML = favorites.map((f, i) => `
+    <div class="oitem">
+      <span class="emoji">💖</span>
+      <div class="body">
+        <div class="desc">${esc(f.recipeName)}</div>
+        <div class="colorname">${esc(f.taste)} × ${SEASONS[f.season]} / ${f.items.map(it => esc(it.colorName.replace(/・.*/,''))).join('・')}</div>
+      </div>
+      <button class="ghost" onclick="removeFavorite(${i})">削除</button>
+    </div>`).join('');
+}
+
+/* ============================================================
+   クローゼットタブ
+============================================================ */
+let pendingPhoto = null;
+document.getElementById('photoInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  pendingPhoto = await compressImage(f, 640, 0.82);
+  document.getElementById('photoDrop').innerHTML = `<img src="${pendingPhoto}" alt=""><span class="muted">タップで変更</span>`;
+});
+function compressImage(file, maxSize, quality) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale);
+      cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(img.src);
+      res(cv.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function addClosetItem() {
+  const item = {
+    id: 'c' + Date.now(),
+    category: document.getElementById('ciCat').value,
+    color: document.getElementById('ciColor').value,
+    name: document.getElementById('ciName').value.trim(),
+    photo: pendingPhoto,
+    ts: Date.now(),
+  };
+  await idbPut(item);
+  closet.push(item);
+  pendingPhoto = null;
+  document.getElementById('ciName').value = '';
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoDrop').innerHTML = '<span id="photoDropText">🖼️ 写真を選ぶ / 撮る</span>';
+  renderCloset();
+  toast('クローゼットに追加しました 👚');
+}
+async function delClosetItem(id) {
+  if (!confirm('この服を削除しますか?')) return;
+  await idbDel(id);
+  closet = closet.filter(i => i.id !== id);
+  renderCloset();
+}
+function renderCloset() {
+  const grid = document.getElementById('closetGrid');
+  document.getElementById('closetEmpty').style.display = closet.length ? 'none' : 'block';
+  document.getElementById('closetCount').textContent = closet.length ? `(${closet.length}着)` : '';
+  grid.innerHTML = closet.slice().reverse().map(i => `
+    <div class="citem">
+      ${i.photo ? `<img src="${i.photo}" alt="">` : `<div class="noimg">${CAT_EMOJI[i.category] || '👗'}</div>`}
+      <button class="del" onclick="delClosetItem('${i.id}')">×</button>
+      <div class="meta">
+        <div class="n">${esc(i.name || i.category)}</div>
+        <div class="c"><span class="swatch" style="background:${colorHexByName(i.color)}"></span>${esc(i.color)}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ============================================================
+   診断タブ
+============================================================ */
+const SKEL_QUIZ = [
+  ['手のひらの厚みは?', [['厚みがあって弾力がある','straight'],['薄くて華奢','wave'],['手が大きめで関節・筋が目立つ','natural']]],
+  ['首の印象は?', [['やや短め・詰まって見える','straight'],['細くて長め','wave'],['筋や鎖骨がしっかり見える','natural']]],
+  ['体の厚みは?', [['胸やお腹に厚みがあり立体的','straight'],['薄くて平面的、下半身に重心','wave'],['厚みより骨っぽさが目立つ','natural']]],
+  ['腰の位置は?', [['高め','straight'],['低め','wave'],['よくわからない・骨盤がしっかり','natural']]],
+  ['よく似合うと言われるのは?', [['シンプルなきれいめ','straight'],['ふんわり可愛い系','wave'],['ラフなゆったり系','natural']]],
+  ['太るとしたらどこから?', [['上半身・お腹まわり','straight'],['下半身(お尻・太もも)','wave'],['あまり変わらない・全体的に','natural']]],
+  ['肌の質感は?', [['ハリと弾力がある','straight'],['ふわふわやわらかい','wave'],['やや硬め・ドライ','natural']]],
+];
+const PC_QUIZ = [
+  ['手首の内側の血管の色は?', [['緑っぽく見える','warm'],['青〜紫っぽく見える','cool']]],
+  ['似合うと感じるアクセサリーは?', [['ゴールド','warm'],['シルバー','cool']]],
+  ['瞳の色は?', [['明るい茶色','warm'],['黒っぽい・赤みの焦げ茶','cool']]],
+  ['日焼けをすると?', [['小麦色になりやすい','warm'],['赤くなってすぐ元に戻る','cool']]],
+  ['白目と黒目のコントラストは?', [['やわらかい・なじんでいる','light'],['くっきりしている','deep']]],
+  ['似合う色の濃さは?', [['明るいパステル・淡い色','light'],['鮮やか・深みのある色','deep']]],
+  ['地毛の色・質感は?', [['明るめでやわらかい','light'],['黒くてツヤ・コシがある','deep']]],
+];
+const quizState = {};
+
+function startQuiz(kind) {
+  quizState[kind] = { idx: 0, answers: [] };
+  document.getElementById(kind + 'StartBtn').style.display = 'none';
+  renderQuiz(kind);
+}
+function renderQuiz(kind) {
+  const data = kind === 'skel' ? SKEL_QUIZ : PC_QUIZ;
+  const st = quizState[kind];
+  const box = document.getElementById(kind + 'Quiz');
+  box.style.display = 'block';
+  if (st.idx >= data.length) { finishQuiz(kind); return; }
+  const [q, opts] = data[st.idx];
+  box.innerHTML = `
+    <div class="qprog"><div style="width:${st.idx / data.length * 100}%"></div></div>
+    <div class="qq">Q${st.idx + 1}. ${q}</div>
+    ${opts.map(([label, val]) => `<button class="qopt" onclick="answerQuiz('${kind}','${val}')">${label}</button>`).join('')}
+  `;
+}
+function answerQuiz(kind, val) {
+  const st = quizState[kind];
+  st.answers.push(val);
+  st.idx++;
+  renderQuiz(kind);
+}
+function finishQuiz(kind) {
+  const st = quizState[kind];
+  if (kind === 'skel') {
+    const cnt = { straight:0, wave:0, natural:0 };
+    st.answers.forEach(a => cnt[a]++);
+    const top = Object.entries(cnt).sort((a,b) => b[1] - a[1])[0][0];
+    profile.skeleton = top;
+  } else {
+    const warm = st.answers.filter(a => a === 'warm').length;
+    const cool = st.answers.filter(a => a === 'cool').length;
+    const light = st.answers.filter(a => a === 'light').length;
+    const deep = st.answers.filter(a => a === 'deep').length;
+    profile.pc = warm >= cool ? (light >= deep ? 'spring' : 'autumn') : (light >= deep ? 'summer' : 'winter');
+  }
+  saveProfile();
+  document.getElementById(kind + 'Quiz').style.display = 'none';
+  document.getElementById(kind + 'StartBtn').style.display = '';
+  document.getElementById(kind + 'StartBtn').textContent = 'もう一度診断する';
+  renderDiagnoseResults();
+  loadSettingsForm();
+  toast('診断結果を保存しました ✨');
+}
+function renderDiagnoseResults() {
+  const sr = document.getElementById('skelResult');
+  if (profile.skeleton) {
+    const s = SKEL[profile.skeleton];
+    sr.innerHTML = `<div class="result-badge">骨格${s.label}</div>
+      <p class="muted">${s.desc}</p>
+      <h3>得意なアイテム</h3><p class="muted">${s.good}</p>`;
+  } else sr.innerHTML = '';
+  const pr = document.getElementById('pcResult');
+  if (profile.pc) {
+    const p = PC[profile.pc];
+    pr.innerHTML = `<div class="result-badge">${p.label}</div>
+      <p class="muted">${p.desc}</p>
+      <h3>得意カラーパレット</h3>
+      <div class="palette">${p.colors.map(c =>
+        `<div class="pcol"><span style="background:${c[1]}"></span>${c[0]}${c[3] ? '🔥' : ''}</div>`).join('')}</div>
+      <p class="muted" style="margin-top:6px">🔥 = 2026年トレンドカラー</p>`;
+  } else pr.innerHTML = '';
+}
+
+/* ============================================================
+   写真でカラーチェック(参考)
+   肌色ピクセルを検出 → Lab色空間の色相角でイエベ/ブルベ傾向を判定
+============================================================ */
+document.getElementById('pcPhotoInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const cv = await fileToCanvas(f, 320);
+    document.getElementById('pcPhotoDrop').innerHTML =
+      `<img src="${cv.toDataURL('image/jpeg', .8)}" alt=""><span class="muted">タップで別の写真に変更</span>`;
+    analyzeSkinPhoto(cv);
+  } catch {
+    toast('写真を読み込めませんでした🥲');
+  }
+  e.target.value = '';
+});
+
+function fileToCanvas(file, maxSize) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(img.width * scale));
+      cv.height = Math.max(1, Math.round(img.height * scale));
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(img.src);
+      res(cv);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// sRGB → Lab(D65)
+function rgb2lab(r, g, b) {
+  const lin = (v) => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+  const [R, G, B] = [lin(r), lin(g), lin(b)];
+  let X = (R * .4124 + G * .3576 + B * .1805) / .95047;
+  let Y =  R * .2126 + G * .7152 + B * .0722;
+  let Z = (R * .0193 + G * .1192 + B * .9505) / 1.08883;
+  const f = (t) => t > .008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116);
+  [X, Y, Z] = [f(X), f(Y), f(Z)];
+  return { L: 116 * Y - 16, a: 500 * (X - Y), b: 200 * (Y - Z) };
+}
+
+function analyzeSkinPhoto(cv) {
+  const ctx = cv.getContext('2d');
+  // 顔は中央にあることが多いので中央70%だけをサンプリング
+  const x0 = Math.floor(cv.width * .15), y0 = Math.floor(cv.height * .15);
+  const w = Math.max(1, Math.floor(cv.width * .7)), h = Math.max(1, Math.floor(cv.height * .7));
+  const data = ctx.getImageData(x0, y0, w, h).data;
+  let sr = 0, sg = 0, sb = 0, n = 0, total = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2];
+    total++;
+    // YCbCrの肌色レンジで肌ピクセルを抽出
+    const Y  = .299 * r + .587 * g + .114 * b;
+    const Cb = 128 - .168736 * r - .331264 * g + .5 * b;
+    const Cr = 128 + .5 * r - .418688 * g - .081312 * b;
+    if (Y > 45 && Y < 245 && Cb >= 80 && Cb <= 125 && Cr >= 134 && Cr <= 172) {
+      sr += r; sg += g; sb += b; n++;
+    }
+  }
+  const box = document.getElementById('pcPhotoResult');
+  if (n < total * .04) {
+    box.innerHTML = `<p class="muted" style="margin-top:12px">🥲 肌がうまく検出できませんでした。<br>顔が大きめに写った、明るい場所の写真でもう一度試してみてください。</p>`;
+    return;
+  }
+  const r = sr / n, g = sg / n, b = sb / n;
+  const lab = rgb2lab(r, g, b);
+  const hue = Math.atan2(lab.b, lab.a) * 180 / Math.PI; // 大きいほど黄み(イエベ寄り)
+  const warmScore = Math.max(-1, Math.min(1, (hue - 50) / 14));
+  const isWarm = warmScore >= 0;
+  const isLight = lab.L >= 60;
+  const season = isWarm ? (isLight ? 'spring' : 'autumn') : (isLight ? 'summer' : 'winter');
+  const strength = Math.abs(warmScore) > .6 ? 'しっかり' : Math.abs(warmScore) > .25 ? 'やや' : 'ごくわずかに';
+  const markPos = 50 + warmScore * 42;
+  const swatch = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+
+  box.innerHTML = `
+    <div style="margin-top:14px">
+      <div><span class="skin-swatch" style="background:${swatch}"></span><b style="font-size:14px">${isWarm ? 'イエベ' : 'ブルベ'}寄り</b><span class="muted">(${strength}${isWarm ? '黄み' : '青み・赤み'}肌)</span></div>
+      <div class="gauge"><div class="mark" style="left:${markPos}%"></div></div>
+      <div class="gauge-labels"><span>ブルベ寄り</span><span>中間</span><span>イエベ寄り</span></div>
+      <p class="muted" style="margin-top:10px">肌の明るさとあわせると <b>${PC[season].label}</b> の可能性が高そうです。<br>※照明や写真の色補正に影響されるので、質問式の診断と合わせて参考にしてね。</p>
+      <div class="btn-row">
+        <button class="primary" onclick="applyPhotoPC('${season}')">この結果をパーソナルカラーに設定 🎨</button>
+      </div>
+    </div>`;
+}
+
+function applyPhotoPC(season) {
+  profile.pc = season;
+  saveProfile();
+  renderDiagnoseResults();
+  loadSettingsForm();
+  toast(PC[season].label + ' に設定しました 🎨');
+}
+
+/* ============================================================
+   トレンドタブ
+============================================================ */
+function renderTrends() {
+  document.getElementById('trendCards').innerHTML = TRENDS.map(t => `
+    <div class="card trend-card">
+      <h3>${t.emoji} ${t.key}</h3>
+      <p class="muted">${t.text}</p>
+    </div>`).join('');
+}
+
+/* ============================================================
+   設定タブ
+============================================================ */
+function loadSettingsForm() {
+  document.getElementById('setHeight').value = profile.height;
+  document.getElementById('setWeight').value = profile.weight;
+  document.getElementById('setSkel').value = profile.skeleton || '';
+  document.getElementById('setPC').value = profile.pc || '';
+  document.getElementById('setNG').value = profile.ng || '';
+  document.getElementById('setTastes').innerHTML = TASTES.map(t =>
+    `<span class="chip ${profile.tastes.includes(t) ? 'on' : ''}" onclick="toggleChip(this)" data-v="${t}">${t}</span>`).join('');
+  document.getElementById('setColors').innerHTML = COLORS.map(([n, h]) =>
+    `<span class="chip ${profile.favColors.includes(n) ? 'on' : ''}" onclick="toggleChip(this)" data-v="${n}"><span class="swatch" style="background:${h}"></span>${n}</span>`).join('');
+}
+function toggleChip(el) { el.classList.toggle('on'); }
+function saveSettings() {
+  profile.height = parseFloat(document.getElementById('setHeight').value) || 150;
+  profile.weight = parseFloat(document.getElementById('setWeight').value) || 37;
+  profile.skeleton = document.getElementById('setSkel').value || null;
+  profile.pc = document.getElementById('setPC').value || null;
+  profile.ng = document.getElementById('setNG').value.trim();
+  profile.tastes = [...document.querySelectorAll('#setTastes .chip.on')].map(c => c.dataset.v);
+  if (!profile.tastes.length) profile.tastes = ['ガーリー'];
+  profile.favColors = [...document.querySelectorAll('#setColors .chip.on')].map(c => c.dataset.v);
+  saveProfile();
+  renderDiagnoseResults();
+  uiTaste = profile.tastes[0];
+  renderSuggestControls();
+  toast('保存しました 💾');
+}
+
+/* ============================================================
+   共通・初期化
+============================================================ */
+function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function initSelects() {
+  document.getElementById('ciCat').innerHTML = CATS.map(c => `<option>${c}</option>`).join('');
+  document.getElementById('ciColor').innerHTML = COLORS.map(([n]) => `<option>${n}</option>`).join('');
+}
+
+(async function init() {
+  initSelects();
+  renderSuggestControls();
+  renderProfileSummary();
+  renderDiagnoseResults();
+  renderTrends();
+  loadSettingsForm();
+  renderFavorites();
+  try { await openDB(); closet = await idbAll(); } catch (e) { console.warn('IDB unavailable', e); }
+  renderCloset();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
